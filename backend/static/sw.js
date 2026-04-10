@@ -1,4 +1,4 @@
-const CACHE = 'mysplit-v9';
+const CACHE = 'mysplit-v3';
 const ASSETS = ['/', '/manifest.json'];
 
 self.addEventListener('install', e => {

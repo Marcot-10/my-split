@@ -6,1447 +6,406 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="My Split">
-<meta name="theme-color" content="#0a0a0a">
+<meta name="theme-color" content="#0f0f0f">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <title>My Split</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Bebas+Neue&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-:root {
-  /* Core palette — B&W */
-  --bg: #000000;
-  --surface: #0f0f0f;
-  --surface2: #1a1a1a;
-  --surface3: #242424;
-  --surface4: #2e2e2e;
-  --border: rgba(255,255,255,0.08);
-  --border2: rgba(255,255,255,0.15);
-  --text: #ffffff;
-  --text2: #999999;
-  --muted: #555555;
-
-  /* Accent — white-only */
-  --green: #ffffff;
-  --green-dim: rgba(255,255,255,0.07);
-  --green-glow: rgba(255,255,255,0.12);
-  --blue: #cccccc;
-  --blue-dim: rgba(255,255,255,0.07);
-  --purple: #aaaaaa;
-  --purple-dim: rgba(255,255,255,0.07);
-  --orange: #ffffff;
-  --orange-dim: rgba(255,255,255,0.07);
-  --teal: #bbbbbb;
-  --teal-dim: rgba(255,255,255,0.07);
-  --red: #ff5555;
-  --red-dim: rgba(255,85,85,0.12);
-  --gold: #cccccc;
-  --gold-dim: rgba(255,255,255,0.07);
-
-  /* Day type colours */
-  --push: var(--text);
-  --pull: var(--text2);
-  --legs: var(--text);
-  --upper: var(--text2);
-  --lower: var(--text);
-  --rest: var(--muted);
-  --check: var(--text);
-  --danger: var(--red);
-
-  /* Layout */
-  --nav-h: 68px;
-  --top-h: 56px;
-  --radius: 14px;
-  --radius-sm: 10px;
-  --radius-xs: 7px;
-  --safe-top: env(safe-area-inset-top, 0px);
-  --safe-bottom: env(safe-area-inset-bottom, 0px);
+:root{
+  --bg:#0f0f0f;--surface:#1a1a1a;--surface2:#242424;--surface3:#2e2e2e;
+  --border:rgba(255,255,255,0.08);--text:#f0f0f0;--muted:#777;
+  --push:#e8613a;--pull:#4a9eff;--legs:#4ecb7f;--upper:#b57aff;--lower:#2dd4bf;
+  --rest:#555;--check:#4ecb7f;--danger:#e05050;--gold:#f5a623;
+  --nav-h:64px;
+  --safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px);
 }
-
-/* ── RESET ────────────────────────────────────────────────────────────────── */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { -webkit-text-size-adjust: 100%; }
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: 'Inter', sans-serif;
-  font-size: 15px;
-  line-height: 1.5;
-  min-height: 100vh;
-  overscroll-behavior: none;
-  -webkit-tap-highlight-color: transparent;
-  -webkit-font-smoothing: antialiased;
-}
-button { font-family: inherit; }
-input, select, textarea { font-family: inherit; }
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;overscroll-behavior:none}
 
 /* ── AUTH SCREEN ─────────────────────────────────────────────────────────── */
-#authScreen {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  padding: 40px 24px;
-  background: radial-gradient(ellipse at 50% 0%, rgba(255,255,255,0.04) 0%, transparent 65%), var(--bg);
-}
-.auth-wordmark {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 56px;
-  letter-spacing: 6px;
-  background: var(--text);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  margin-bottom: 6px;
-  line-height: 1;
-}
-.auth-tagline {
-  font-size: 13px;
-  color: var(--muted);
-  letter-spacing: 0.05em;
-  margin-bottom: 48px;
-  text-transform: uppercase;
-  font-weight: 500;
-}
-.auth-card {
-  width: 100%;
-  max-width: 380px;
-  background: var(--surface);
-  border: 1px solid var(--border2);
-  border-radius: 20px;
-  padding: 28px 24px;
-  box-shadow: 0 24px 64px rgba(0,0,0,0.5);
-}
-.auth-tabs {
-  display: flex;
-  margin-bottom: 24px;
-  background: var(--surface2);
-  border-radius: var(--radius-sm);
-  padding: 3px;
-  gap: 3px;
-}
-.auth-tab {
-  flex: 1;
-  padding: 9px;
-  text-align: center;
-  font-size: 13px;
-  font-weight: 600;
-  border-radius: 8px;
-  cursor: pointer;
-  color: var(--muted);
-  transition: all 0.2s;
-}
-.auth-tab.active { background: var(--surface3); color: var(--text); }
-.auth-input {
-  width: 100%;
-  background: var(--surface2);
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 13px 14px;
-  color: var(--text);
-  font-size: 15px;
-  outline: none;
-  margin-bottom: 10px;
-  transition: border-color 0.2s;
-}
-.auth-input:focus { border-color: var(--green); }
-.auth-input::placeholder { color: var(--muted); }
-.auth-btn {
-  width: 100%;
-  padding: 14px;
-  background: var(--green);
-  border: none;
-  border-radius: var(--radius-sm);
-  color: #0a0a0a;
-  font-size: 15px;
-  font-weight: 700;
-  cursor: pointer;
-  margin-top: 4px;
-  transition: opacity 0.2s, transform 0.1s;
-  letter-spacing: 0.01em;
-}
-.auth-btn:active { opacity: 0.85; transform: scale(0.99); }
-.auth-error { font-size: 13px; color: var(--red); margin-top: 10px; text-align: center; min-height: 20px; }
-.auth-offline { font-size: 12px; color: var(--muted); text-align: center; margin-top: 20px; line-height: 1.6; }
-.auth-offline a { color: var(--blue); cursor: pointer; text-decoration: underline; }
+#authScreen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:40px 24px}
+.auth-logo{font-family:'Bebas Neue',sans-serif;font-size:52px;letter-spacing:4px;margin-bottom:8px}
+.auth-tagline{font-size:14px;color:var(--muted);margin-bottom:48px}
+.auth-card{width:100%;max-width:380px;background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:28px 24px}
+.auth-tabs{display:flex;margin-bottom:24px;background:var(--surface2);border-radius:10px;padding:3px}
+.auth-tab{flex:1;padding:9px;text-align:center;font-size:13px;font-weight:500;border-radius:8px;cursor:pointer;color:var(--muted);transition:all .2s}
+.auth-tab.active{background:var(--surface3);color:var(--text)}
+.auth-input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:13px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;outline:none;margin-bottom:10px;transition:border-color .2s}
+.auth-input:focus{border-color:rgba(78,203,127,0.5)}
+.auth-btn{width:100%;padding:14px;background:var(--check);border:none;border-radius:10px;color:#0f0f0f;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;margin-top:4px;transition:opacity .2s}
+.auth-btn:active{opacity:.85}
+.auth-error{font-size:13px;color:var(--danger);margin-top:10px;text-align:center;min-height:20px}
+.auth-offline{font-size:12px;color:var(--muted);text-align:center;margin-top:20px;line-height:1.6}
+.auth-offline a{color:var(--pull);cursor:pointer;text-decoration:underline}
 
-/* ── PROGRAM SETUP ───────────────────────────────────────────────────────── */
-#programSetup {
-  display: none;
-  flex-direction: column;
-  align-items: center;
-  min-height: 100vh;
-  padding: 52px 20px 32px;
-  background: var(--bg);
-}
-.setup-logo {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 38px;
-  letter-spacing: 5px;
-  background: var(--text);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-  margin-bottom: 4px;
-}
-.setup-sub { font-size: 13px; color: var(--muted); margin-bottom: 32px; text-align: center; }
-.setup-section-label {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 1.5px;
-  color: var(--muted);
-  text-transform: uppercase;
-  margin-bottom: 12px;
-  align-self: flex-start;
-  width: 100%;
-  max-width: 420px;
-}
-.template-grid { display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 420px; margin-bottom: 28px; }
-.template-card {
-  background: var(--surface);
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius);
-  padding: 16px 18px;
-  cursor: pointer;
-  transition: border-color 0.2s, background 0.2s;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-.template-card:active, .template-card.selected {
-  border-color: var(--green);
-  background: var(--green-dim);
-}
-.template-card-icon { font-size: 24px; flex-shrink: 0; }
-.template-card-body { flex: 1; min-width: 0; }
-.template-card-name { font-size: 14px; font-weight: 700; color: var(--text); }
-.template-card-desc { font-size: 12px; color: var(--text2); margin-top: 2px; line-height: 1.4; }
-.template-card-check {
-  width: 22px; height: 22px; border-radius: 50%;
-  border: 1.5px solid var(--border2);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 11px; color: transparent; flex-shrink: 0;
-  transition: all 0.2s;
-}
-.template-card.selected .template-card-check { background: var(--green); border-color: var(--green); color: #0a0a0a; }
-.setup-name-wrap { width: 100%; max-width: 420px; margin-bottom: 20px; }
-.setup-name-input {
-  width: 100%;
-  background: var(--surface);
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 14px 16px;
-  color: var(--text);
-  font-size: 16px;
-  font-weight: 600;
-  outline: none;
-  transition: border-color 0.2s;
-}
-.setup-name-input:focus { border-color: var(--green); }
-.setup-name-input::placeholder { color: var(--muted); font-weight: 400; }
-.setup-start-btn {
-  width: 100%;
-  max-width: 420px;
-  padding: 16px;
-  background: var(--green);
-  border: none;
-  border-radius: var(--radius);
-  color: #0a0a0a;
-  font-size: 16px;
-  font-weight: 800;
-  cursor: pointer;
-  letter-spacing: 0.3px;
-  transition: opacity 0.2s;
-}
-.setup-start-btn:active { opacity: 0.85; }
+/* ── PROGRAM SETUP SCREEN ────────────────────────────────────────────────── */
+#programSetup{display:none;flex-direction:column;align-items:center;min-height:100vh;padding:48px 24px 32px;background:var(--bg)}
+.setup-logo{font-family:'Bebas Neue',sans-serif;font-size:42px;letter-spacing:4px;margin-bottom:6px}
+.setup-sub{font-size:14px;color:var(--muted);margin-bottom:36px;text-align:center}
+.setup-section-label{font-size:11px;font-weight:600;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:12px;align-self:flex-start;width:100%;max-width:420px}
+.template-grid{display:flex;flex-direction:column;gap:10px;width:100%;max-width:420px;margin-bottom:24px}
+.template-card{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:18px 20px;cursor:pointer;transition:border-color .2s,background .2s;display:flex;align-items:center;gap:16px}
+.template-card:active,.template-card.selected{border-color:var(--check);background:rgba(78,203,127,0.07)}
+.template-card-icon{font-size:26px;flex-shrink:0}
+.template-card-body{flex:1}
+.template-card-name{font-size:15px;font-weight:600;margin-bottom:3px}
+.template-card-desc{font-size:12px;color:var(--muted);line-height:1.5}
+.template-card-check{width:20px;height:20px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.template-card.selected .template-card-check{background:var(--check);border-color:var(--check)}
+.setup-name-wrap{width:100%;max-width:420px;margin-bottom:20px}
+.setup-name-input{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:13px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;outline:none;transition:border-color .2s}
+.setup-name-input:focus{border-color:rgba(78,203,127,0.5)}
+.setup-start-btn{width:100%;max-width:420px;padding:15px;background:var(--check);border:none;border-radius:12px;color:#0f0f0f;font-family:'DM Sans',sans-serif;font-size:16px;font-weight:700;cursor:pointer;transition:opacity .2s}
+.setup-start-btn:disabled{opacity:.4;cursor:default}
 
-/* ── APP SHELL ────────────────────────────────────────────────────────────── */
-#appShell { display: none; min-height: 100vh; }
-body.has-app { overflow: hidden; }
-body.has-app #appShell { display: flex; flex-direction: column; height: 100vh; }
+/* ── PROGRAM MANAGER MODAL ───────────────────────────────────────────────── */
+.prog-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:300;display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:opacity .25s}
+.prog-modal-overlay.open{opacity:1;pointer-events:all}
+.prog-modal-sheet{background:var(--surface);border-radius:20px 20px 0 0;padding:20px 20px 40px;width:100%;max-height:85vh;overflow-y:auto;transform:translateY(100%);transition:transform .3s cubic-bezier(.32,.72,0,1)}
+.prog-modal-overlay.open .prog-modal-sheet{transform:translateY(0)}
+.prog-modal-handle{width:36px;height:4px;background:var(--surface3);border-radius:2px;margin:0 auto 18px}
+.prog-modal-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;margin-bottom:16px}
+.prog-list{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+.prog-list-item{background:var(--surface2);border:1.5px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:border-color .2s}
+.prog-list-item.active-prog{border-color:var(--check)}
+.prog-list-item-body{flex:1}
+.prog-list-item-name{font-size:14px;font-weight:600}
+.prog-list-item-sub{font-size:12px;color:var(--muted);margin-top:2px}
+.prog-active-badge{font-size:10px;font-weight:700;color:var(--check);background:rgba(78,203,127,0.12);border:1px solid rgba(78,203,127,0.3);border-radius:20px;padding:3px 8px;white-space:nowrap}
+.prog-del-btn{background:none;border:none;color:var(--danger);font-size:13px;cursor:pointer;padding:4px 8px;opacity:.7}
+.prog-add-btn{width:100%;padding:13px;background:var(--surface2);border:1.5px dashed var(--border);border-radius:12px;color:var(--upper);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:border-color .2s,background .2s}
+.prog-add-btn:active{background:var(--surface3)}
 
-.offline-banner {
-  background: var(--orange-dim);
-  border-bottom: 1px solid rgba(251,146,60,0.2);
-  padding: 8px 16px;
-  font-size: 12px;
-  color: var(--orange);
-  text-align: center;
-  display: none;
-}
-body.offline .offline-banner { display: block; }
+/* ── TOAST ───────────────────────────────────────────────────────────────── */
+.toast{position:fixed;bottom:calc(var(--nav-h) + 16px + var(--safe-bottom));left:50%;transform:translateX(-50%) translateY(20px);background:var(--surface3);border:1px solid var(--border);border-radius:12px;padding:12px 18px;font-size:13px;font-weight:500;white-space:nowrap;z-index:500;opacity:0;transition:all .25s;pointer-events:none;max-width:90vw;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:all}
+.toast .toast-undo{color:var(--upper);font-weight:700;cursor:pointer;margin-left:10px;text-decoration:underline}
 
-/* ── TOP BAR ─────────────────────────────────────────────────────────────── */
-.top-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 16px;
-  height: var(--top-h);
-  padding-top: var(--safe-top);
-  background: rgba(10,10,10,0.95);
-  backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--border);
-  flex-shrink: 0;
-  position: sticky;
-  top: 0;
-  z-index: 50;
-}
-.app-title {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 24px;
-  letter-spacing: 3px;
-  background: var(--text);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-}
-.top-actions { display: flex; align-items: center; gap: 6px; }
-.top-btn {
-  padding: 6px 12px;
-  background: var(--surface2);
-  border: 1px solid var(--border2);
-  border-radius: 20px;
-  color: var(--text2);
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.15s;
-  white-space: nowrap;
-}
-.top-btn:active { background: var(--surface3); color: var(--text); }
-.top-btn.active-mode { background: var(--purple-dim); border-color: rgba(167,139,250,0.3); color: var(--purple); }
-.streak-chip {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 5px 10px;
-  background: var(--gold-dim);
-  border: 1px solid rgba(251,191,36,0.2);
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--gold);
-}
-.sync-dot {
-  width: 7px; height: 7px;
-  border-radius: 50%;
-  background: var(--green);
-  box-shadow: 0 0 6px var(--green-glow);
-  flex-shrink: 0;
-}
-.sync-dot.offline { background: var(--red); box-shadow: none; }
+/* ── REST TIMER ─────────────────────────────────────────────────────────── */
+.rest-timer-fab{position:fixed;bottom:calc(var(--nav-h) + 14px + var(--safe-bottom));right:16px;width:52px;height:52px;border-radius:50%;background:var(--surface3);border:1.5px solid var(--border);display:none;align-items:center;justify-content:center;cursor:pointer;z-index:200;font-size:11px;font-weight:700;color:var(--text);flex-direction:column;gap:1px;box-shadow:0 2px 12px rgba(0,0,0,0.4)}
+.rest-timer-fab.visible{display:flex}
+.rest-timer-fab.running{border-color:var(--check);color:var(--check)}
+.rest-timer-fab .fab-label{font-size:9px;color:var(--muted)}
+.rest-timer-sheet{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-radius:20px 20px 0 0;padding:24px 24px 40px;z-index:400;transform:translateY(100%);transition:transform .3s cubic-bezier(.32,.72,0,1);border-top:1px solid var(--border)}
+.rest-timer-sheet.open{transform:translateY(0)}
+.rest-timer-handle{width:36px;height:4px;background:var(--surface3);border-radius:2px;margin:0 auto 20px}
+.rest-timer-label{font-size:12px;color:var(--muted);text-align:center;margin-bottom:8px;letter-spacing:1px;text-transform:uppercase}
+.rest-timer-display{font-family:'Bebas Neue',sans-serif;font-size:80px;letter-spacing:4px;text-align:center;line-height:1;margin-bottom:20px}
+.rest-timer-display.urgent{color:var(--danger)}
+.rest-timer-presets{display:flex;gap:8px;justify-content:center;margin-bottom:20px}
+.rest-preset-btn{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:8px 16px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;transition:all .2s}
+.rest-preset-btn.active{background:rgba(78,203,127,0.15);border-color:var(--check);color:var(--check)}
+.rest-timer-actions{display:flex;gap:10px}
+.rest-timer-btn{flex:1;padding:13px;border:none;border-radius:12px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;transition:opacity .2s}
+.rest-timer-btn.primary{background:var(--check);color:#0f0f0f}
+.rest-timer-btn.secondary{background:var(--surface2);color:var(--muted);border:1px solid var(--border)}
 
-/* ── PAGES ────────────────────────────────────────────────────────────────── */
-.page { display: none; flex: 1; overflow-y: auto; overscroll-behavior: contain; }
-.page.active { display: flex; flex-direction: column; }
-.content { flex: 1; padding: 12px 14px 20px; }
+/* ── CONFIRM MODAL ──────────────────────────────────────────────────────── */
+.confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:450;display:flex;align-items:center;justify-content:center;padding:24px;opacity:0;pointer-events:none;transition:opacity .2s}
+.confirm-overlay.open{opacity:1;pointer-events:all}
+.confirm-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:28px 24px;width:100%;max-width:340px}
+.confirm-title{font-size:17px;font-weight:700;margin-bottom:8px}
+.confirm-body{font-size:14px;color:var(--muted);margin-bottom:24px;line-height:1.5}
+.confirm-actions{display:flex;gap:10px}
+.confirm-btn{flex:1;padding:13px;border:none;border-radius:12px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer}
+.confirm-btn.danger{background:var(--danger);color:#fff}
+.confirm-btn.cancel{background:var(--surface2);color:var(--muted);border:1px solid var(--border)}
 
-/* ── DAY SCROLL ──────────────────────────────────────────────────────────── */
-.day-scroll-wrap {
-  overflow-x: auto;
-  scrollbar-width: none;
-  border-bottom: 1px solid var(--border);
-  background: var(--surface);
-  flex-shrink: 0;
-}
-.day-scroll-wrap::-webkit-scrollbar { display: none; }
-.day-scroll {
-  display: flex;
-  padding: 8px 12px;
-  gap: 6px;
-  min-width: max-content;
-}
-.day-pill {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 8px 14px;
-  border-radius: 12px;
-  cursor: pointer;
-  border: 1.5px solid transparent;
-  background: var(--surface2);
-  transition: all 0.15s;
-  min-width: 58px;
-  position: relative;
-}
-.day-pill:active { opacity: 0.8; }
-.d-label { font-size: 11px; font-weight: 700; color: var(--text2); letter-spacing: 0.5px; }
-.d-type { font-size: 10px; color: var(--muted); margin-top: 1px; text-transform: uppercase; letter-spacing: 0.3px; }
-.day-pill.active { border-color: var(--green); background: var(--green-dim); }
-.day-pill.active .d-label { color: var(--green); }
-.day-pill.active .d-type { color: rgba(255,255,255,0.6); }
-.day-pill[data-type="push"].active { border-color: var(--orange); background: var(--orange-dim); }
-.day-pill[data-type="push"].active .d-label { color: var(--orange); }
-.day-pill[data-type="pull"].active { border-color: var(--blue); background: var(--blue-dim); }
-.day-pill[data-type="pull"].active .d-label { color: var(--blue); }
-.day-pill[data-type="legs"].active { border-color: var(--green); background: var(--green-dim); }
-.day-pill[data-type="legs"].active .d-label { color: var(--green); }
-.day-pill[data-type="upper"].active { border-color: var(--purple); background: var(--purple-dim); }
-.day-pill[data-type="upper"].active .d-label { color: var(--purple); }
-.day-pill[data-type="lower"].active { border-color: var(--teal); background: var(--teal-dim); }
-.day-pill[data-type="lower"].active .d-label { color: var(--teal); }
+/* ── HISTORY FILTERS ────────────────────────────────────────────────────── */
+.history-filters{padding:12px 16px 0;display:flex;gap:8px;flex-wrap:wrap}
+.history-search{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;margin-bottom:8px}
+.history-search:focus{border-color:rgba(78,203,127,0.4)}
+.filter-chip{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:6px 14px;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;transition:all .2s;white-space:nowrap}
+.filter-chip.active{background:rgba(78,203,127,0.12);border-color:rgba(78,203,127,0.4);color:var(--check)}
 
-/* ── PROGRESS HEADER ─────────────────────────────────────────────────────── */
-.progress-wrap { padding: 14px 14px 10px; flex-shrink: 0; }
-.progress-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 8px; }
-.progress-title { font-size: 22px; font-weight: 900; letter-spacing: -0.3px; color: var(--text); }
-.progress-count { font-size: 13px; font-weight: 600; color: var(--text2); }
-.progress-bar-bg { height: 4px; background: var(--surface3); border-radius: 2px; overflow: hidden; }
-.progress-bar-fill { height: 100%; background: var(--green); border-radius: 2px; transition: width 0.4s cubic-bezier(.4,0,.2,1); }
+/* ── STATS DATE RANGE + VOLUME CHART ────────────────────────────────────── */
+.stats-range-tabs{display:flex;background:var(--surface2);border-radius:10px;padding:3px;margin-bottom:16px}
+.stats-range-tab{flex:1;padding:8px;text-align:center;font-size:12px;font-weight:500;border-radius:8px;cursor:pointer;color:var(--muted);transition:all .2s}
+.stats-range-tab.active{background:var(--surface3);color:var(--text)}
+.volume-chart{margin-top:16px}
+.volume-bar-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.volume-bar-label{font-size:12px;color:var(--muted);width:80px;flex-shrink:0;text-transform:capitalize}
+.volume-bar-track{flex:1;height:14px;background:var(--surface2);border-radius:7px;overflow:hidden}
+.volume-bar-fill{height:100%;border-radius:7px;transition:width .4s}
+.volume-bar-count{font-size:11px;color:var(--muted);width:24px;text-align:right;flex-shrink:0}
+
+/* ── REORDER BUTTONS ────────────────────────────────────────────────────── */
+.reorder-btn{background:none;border:none;color:var(--muted);font-size:14px;cursor:pointer;padding:4px 6px;opacity:.7;transition:opacity .2s}
+.reorder-btn:active{opacity:1}
+
+/* ── GROUP SETTINGS MODAL ────────────────────────────────────────────────── */
+.pick-count-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;margin-bottom:14px}
+.pick-count-btn{flex:1;min-width:52px;padding:10px 6px;background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;text-align:center;transition:all .2s}
+.pick-count-btn.active{background:rgba(78,203,127,0.12);border-color:var(--check);color:var(--check)}
+.group-settings-btn{background:none;border:1px solid rgba(181,122,255,0.3);border-radius:6px;color:var(--upper);font-size:10px;font-weight:600;padding:3px 8px;cursor:pointer;letter-spacing:.04em;white-space:nowrap}
+
+/* ── AUTH LOADING ────────────────────────────────────────────────────────── */
+.auth-btn:disabled{opacity:.6;cursor:default}
+
+/* ── OFFLINE BANNER ──────────────────────────────────────────────────────── */
+.offline-banner{background:rgba(245,166,35,0.1);border-bottom:1px solid rgba(245,166,35,0.2);padding:8px 16px;text-align:center;font-size:12px;color:var(--gold);display:none}
+.offline-banner.show{display:block}
+
+/* ── STREAK CHIP ALWAYS VISIBLE ─────────────────────────────────────────── */
+.streak-chip.dim{opacity:.35}
+
+/* ── APP SHELL ───────────────────────────────────────────────────────────── */
+#appShell{display:none}
+.top-bar{position:sticky;top:0;z-index:100;background:rgba(15,15,15,0.95);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);padding:calc(var(--safe-top) + 14px) 20px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px}
+.app-title{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:2px;flex-shrink:0}
+.top-actions{display:flex;gap:8px;align-items:center}
+.top-btn{font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:6px 14px;cursor:pointer;transition:color .2s,border-color .2s;white-space:nowrap}
+.top-btn.active-mode{color:var(--upper);border-color:rgba(181,122,255,0.4)}
+.streak-chip{display:flex;align-items:center;gap:4px;font-size:12px;font-weight:600;color:var(--gold);background:rgba(245,166,35,0.1);border:1px solid rgba(245,166,35,0.25);border-radius:20px;padding:5px 10px;flex-shrink:0}
+.sync-dot{width:7px;height:7px;border-radius:50%;background:var(--check);flex-shrink:0}
+.sync-dot.offline{background:var(--danger)}
+
+/* ── BOTTOM NAV ─────────────────────────────────────────────────────────── */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:200;background:rgba(15,15,15,0.97);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--border);display:flex;height:calc(var(--nav-h) + var(--safe-bottom));padding-bottom:var(--safe-bottom)}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;color:var(--muted);border:none;background:none;padding:0;transition:color .2s}
+.nav-item.active{color:var(--check)}
+.nav-icon{font-size:20px;line-height:1}
+.nav-label{font-size:10px;font-weight:500;letter-spacing:.04em}
+body.has-app{padding-bottom:calc(var(--nav-h) + var(--safe-bottom))}
+
+/* ── PAGES ───────────────────────────────────────────────────────────────── */
+.page{display:none}.page.active{display:block}
+
+/* ── DAY SCROLL ─────────────────────────────────────────────────────────── */
+.day-scroll-wrap{overflow-x:auto;overflow-y:hidden;scrollbar-width:none;padding:14px 20px;border-bottom:1px solid var(--border)}
+.day-scroll-wrap::-webkit-scrollbar{display:none}
+.day-scroll{display:flex;gap:8px;width:max-content}
+.day-pill{display:flex;flex-direction:column;align-items:center;padding:9px 14px;border-radius:12px;border:1.5px solid transparent;cursor:pointer;transition:all .15s;min-width:66px;background:var(--surface)}
+.day-pill .d-label{font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:1px}
+.day-pill .d-type{font-size:9px;font-weight:500;margin-top:2px;opacity:.7}
+.day-pill.active{background:var(--surface2)}
+.day-pill[data-type="push"] .d-label{color:var(--push)}.day-pill[data-type="push"].active{border-color:var(--push)}
+.day-pill[data-type="pull"] .d-label{color:var(--pull)}.day-pill[data-type="pull"].active{border-color:var(--pull)}
+.day-pill[data-type="legs"] .d-label{color:var(--legs)}.day-pill[data-type="legs"].active{border-color:var(--legs)}
+.day-pill[data-type="upper"] .d-label{color:var(--upper)}.day-pill[data-type="upper"].active{border-color:var(--upper)}
+.day-pill[data-type="lower"] .d-label{color:var(--lower)}.day-pill[data-type="lower"].active{border-color:var(--lower)}
+.day-pill[data-type="rest"] .d-label{color:var(--rest)}
+
+/* ── PROGRESS ───────────────────────────────────────────────────────────── */
+.progress-wrap{padding:14px 20px 0}
+.progress-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.progress-title{font-family:'Bebas Neue',sans-serif;font-size:21px;letter-spacing:1.5px}
+.progress-count{font-size:13px;color:var(--muted)}
+.progress-bar-bg{height:3px;background:var(--surface2);border-radius:2px;overflow:hidden}
+.progress-bar-fill{height:100%;border-radius:2px;transition:width .4s ease;background:var(--check)}
+.content{padding:14px 16px}
 
 /* ── GROUP CARDS ─────────────────────────────────────────────────────────── */
-.group-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  margin-bottom: 10px;
-  overflow: hidden;
-  transition: border-color 0.15s;
-}
-.group-card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 13px 16px;
-  cursor: pointer;
-  user-select: none;
-  gap: 10px;
-}
-.group-card-left { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
-.group-card-name { font-size: 13px; font-weight: 700; color: var(--text); letter-spacing: 0.01em; }
-.group-card-count {
-  font-size: 11px;
-  font-weight: 700;
-  padding: 2px 8px;
-  border-radius: 10px;
-  background: var(--surface3);
-  color: var(--text2);
-  flex-shrink: 0;
-}
-.group-card.complete .group-card-count { background: var(--green-dim); color: var(--green); }
-.group-card-chevron { font-size: 10px; color: var(--muted); transition: transform 0.2s; flex-shrink: 0; }
-.group-card.open .group-card-chevron { transform: rotate(180deg); }
-.group-card-body { display: none; padding: 0 12px 12px; }
-.group-card.open .group-card-body { display: block; }
-.group-settings-btn {
-  background: none;
-  border: 1px solid var(--border2);
-  border-radius: 6px;
-  color: var(--purple);
-  font-size: 11px;
-  font-weight: 600;
-  padding: 3px 9px;
-  cursor: pointer;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-.group-rule { font-size: 11px; color: var(--text2); padding: 8px 0 4px; font-weight: 500; }
-.edit-hint {
-  background: var(--purple-dim);
-  border: 1px solid rgba(167,139,250,0.2);
-  border-radius: var(--radius-sm);
-  padding: 10px 14px;
-  margin-bottom: 12px;
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--purple);
-}
+.group-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;margin-bottom:10px;overflow:hidden}
+.group-card-header{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;cursor:pointer;user-select:none}
+.group-card-left{display:flex;align-items:center;gap:10px}
+.group-card-name{font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text)}
+.group-card-count{font-size:11px;color:var(--muted)}
+.group-card-chevron{font-size:12px;color:var(--muted);transition:transform .25s}
+.group-card.open .group-card-chevron{transform:rotate(180deg)}
+.group-card-body{display:none;padding:0 12px 12px;border-top:1px solid var(--border)}
+.group-card.open .group-card-body{display:block}
+.group-rule{font-size:11px;color:var(--muted);font-style:italic;padding:8px 0 6px}
 
-/* ── EXERCISE ROWS ───────────────────────────────────────────────────────── */
-.ex-row {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 12px 10px;
-  background: var(--surface2);
-  border-radius: var(--radius-sm);
-  margin-top: 8px;
-  border: 1.5px solid transparent;
-  transition: background 0.15s, border-color 0.15s;
-  cursor: pointer;
-}
-.ex-row.checked {
-  background: rgba(255,255,255,0.03);
-  border-color: rgba(255,255,255,0.12);
-}
-.ex-row.edit-mode { cursor: default; }
-.check-circle {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  border: 2px solid var(--border2);
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-top: 1px;
-  transition: all 0.15s;
-  cursor: pointer;
-}
-.ex-row.checked .check-circle { background: var(--green); border-color: var(--green); }
-.ex-info { flex: 1; min-width: 0; }
-.ex-name {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.ex-row.checked .ex-name { color: var(--text2); text-decoration: line-through; }
-.ex-meta-row { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 5px; }
-.ex-tag {
-  font-size: 9px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  padding: 2px 6px;
-  border-radius: 4px;
-}
-.ex-tag.muscle { background: var(--green-dim); color: var(--green); }
-.ex-tag.equip { background: var(--blue-dim); color: var(--blue); }
-.ex-tag.secondary { background: var(--surface3); color: var(--muted); }
-.ex-weight { font-size: 12px; color: var(--text2); margin-top: 4px; font-weight: 500; }
+/* ── EXERCISE ROW ────────────────────────────────────────────────────────── */
+.ex-row{display:flex;align-items:flex-start;gap:12px;padding:12px 10px;background:var(--surface2);border-radius:10px;margin-top:8px;border:1px solid var(--border);transition:background .15s,border-color .15s;user-select:none;cursor:pointer}
+.ex-row:active{opacity:.85}
+.ex-row.checked{border-color:rgba(78,203,127,0.3);background:rgba(78,203,127,0.05)}
+.ex-row.edit-mode{border-color:rgba(181,122,255,0.3);background:rgba(181,122,255,0.04)}
+.check-circle{width:22px;height:22px;border-radius:50%;flex-shrink:0;border:2px solid rgba(255,255,255,0.18);display:flex;align-items:center;justify-content:center;transition:all .2s;margin-top:1px}
+.ex-row.checked .check-circle{background:var(--check);border-color:var(--check)}
+.check-circle svg{opacity:0;transition:opacity .15s}
+.ex-row.checked .check-circle svg{opacity:1}
+.ex-info{flex:1;min-width:0}
+.ex-name{font-size:14px;font-weight:400;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ex-row.checked .ex-name{color:var(--muted);text-decoration:line-through}
+.ex-meta-row{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}
+.ex-tag{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;padding:2px 6px;border-radius:5px}
+.ex-tag.muscle{background:rgba(78,203,127,0.12);color:var(--check)}
+.ex-tag.equip{background:rgba(74,158,255,0.12);color:var(--pull)}
+.ex-tag.secondary{background:var(--surface3);color:var(--muted)}
+.ex-weight{font-size:12px;color:var(--muted);margin-top:3px}
+.ex-note{font-size:11px;color:var(--pull);margin-top:3px;font-style:italic}
+.pr-badge{font-size:9px;font-weight:700;text-transform:uppercase;background:rgba(245,166,35,0.15);color:var(--gold);padding:2px 6px;border-radius:5px;border:1px solid rgba(245,166,35,0.3)}
+.swap-btn,.edit-icon{width:26px;height:26px;border-radius:7px;background:var(--surface3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;color:var(--muted);margin-top:1px}
+.note-row{padding:4px 10px 10px;margin-top:-4px}
+.note-input{width:100%;background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--pull);font-family:'DM Sans',sans-serif;font-size:12px;padding:4px 0;outline:none}
+.note-input::placeholder{color:var(--muted)}
+.add-ex-btn{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:8px;padding:10px;border-radius:10px;border:1px dashed var(--border);color:var(--muted);font-size:13px;cursor:pointer;background:none;width:100%;transition:color .2s}
+.add-ex-btn:active{color:var(--text)}
 
-/* Inline weight editing — always visible */
-.ex-weight-row { display: flex; align-items: center; gap: 6px; margin-top: 4px; }
-.weight-inline-input {
-  font-size: 12px;
-  font-family: inherit;
-  font-weight: 600;
-  color: var(--text);
-  background: var(--surface3);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 3px 8px;
-  width: 100%;
-  max-width: 180px;
-  transition: border-color 0.15s;
-}
-.weight-inline-input:focus { outline: none; border-color: var(--border2); }
-.weight-inline-input::placeholder { color: var(--muted); font-weight: 400; }
-
-/* NEXT UP pill on day scroll */
-.day-pill.next-up { border-color: rgba(255,255,255,0.3); }
-.day-pill.next-up .d-label { color: var(--text); }
-.day-pill.next-up .d-type { color: var(--text2); font-size: 9px; letter-spacing: 0.05em; }
-.next-up-dot {
-  width: 5px; height: 5px; border-radius: 50%;
-  background: var(--text);
-  position: absolute; top: 5px; right: 5px;
-}
-.ex-note { font-size: 11px; color: var(--blue); margin-top: 3px; font-style: italic; }
-.pr-badge {
-  font-size: 9px;
-  font-weight: 800;
-  text-transform: uppercase;
-  background: var(--gold-dim);
-  color: var(--gold);
-  padding: 2px 7px;
-  border-radius: 4px;
-  border: 1px solid rgba(251,191,36,0.25);
-  margin-left: 4px;
-}
-.swap-btn, .edit-icon {
-  width: 28px;
-  height: 28px;
-  border-radius: var(--radius-xs);
-  background: var(--surface3);
-  border: 1px solid var(--border2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  flex-shrink: 0;
-  color: var(--text2);
-}
-.swap-btn:active, .edit-icon:active { background: var(--surface4); }
-.reorder-btn {
-  background: none;
-  border: none;
-  color: var(--muted);
-  font-size: 11px;
-  cursor: pointer;
-  padding: 1px 4px;
-  line-height: 1.2;
-}
-.note-row { padding: 2px 10px 10px; }
-.ex-note-row { padding: 2px 10px 10px; }
-.note-input {
-  width: 100%;
-  background: transparent;
-  border: none;
-  border-bottom: 1px solid var(--border2);
-  color: var(--blue);
-  font-size: 12px;
-  font-weight: 500;
-  padding: 5px 0;
-  outline: none;
-}
-.note-input::placeholder { color: var(--muted); font-style: italic; font-weight: 400; }
-.add-ex-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  margin-top: 10px;
-  padding: 10px;
-  border-radius: var(--radius-sm);
-  border: 1.5px dashed var(--border2);
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  background: none;
-  width: 100%;
-  transition: color 0.15s, border-color 0.15s;
-}
-.add-ex-btn:active { color: var(--text); border-color: var(--border2); }
-
-/* ── CHOICE BLOCKS ───────────────────────────────────────────────────────── */
-.choice-block {
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  overflow: hidden;
-  margin-top: 8px;
-}
-.choice-header {
-  padding: 8px 14px;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--muted);
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.choice-opt {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 14px;
-  border-bottom: 1px solid var(--border);
-  transition: background 0.12s;
-  user-select: none;
-  cursor: pointer;
-}
-.choice-opt:last-of-type { border-bottom: none; }
-.choice-opt.selected { background: rgba(255,255,255,0.04); }
-.radio-dot {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  flex-shrink: 0;
-  border: 2px solid var(--border2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.15s;
-}
-.choice-opt.selected .radio-dot { border-color: var(--green); background: var(--green); }
-.radio-dot-inner { width: 5px; height: 5px; border-radius: 50%; background: #0a0a0a; opacity: 0; transition: opacity 0.15s; }
-.choice-opt.selected .radio-dot-inner { opacity: 1; }
-.opt-info { flex: 1; min-width: 0; }
-.opt-name { font-size: 14px; font-weight: 500; color: var(--text); }
-.choice-opt.selected .opt-name { color: var(--green); font-weight: 600; }
-.opt-meta { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px; }
-.opt-weight { font-size: 11px; color: var(--text2); margin-top: 2px; }
+/* ── CHOICE BLOCK ────────────────────────────────────────────────────────── */
+.choice-block{background:var(--surface3);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-top:8px}
+.choice-header{padding:7px 12px;font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.choice-opt{display:flex;align-items:center;gap:10px;padding:11px 12px;border-bottom:1px solid var(--border);transition:background .12s;user-select:none;cursor:pointer}
+.choice-opt:last-child{border-bottom:none}
+.choice-opt.selected{background:rgba(78,203,127,0.06)}
+.radio-dot{width:17px;height:17px;border-radius:50%;flex-shrink:0;border:2px solid rgba(255,255,255,0.18);display:flex;align-items:center;justify-content:center;transition:all .15s}
+.choice-opt.selected .radio-dot{border-color:var(--check);background:var(--check)}
+.radio-dot-inner{width:5px;height:5px;border-radius:50%;background:#0f0f0f;opacity:0;transition:opacity .15s}
+.choice-opt.selected .radio-dot-inner{opacity:1}
+.opt-info{flex:1;min-width:0}
+.opt-name{font-size:13px;color:var(--text)}
+.choice-opt.selected .opt-name{color:var(--check)}
+.opt-meta{display:flex;gap:4px;flex-wrap:wrap;margin-top:3px}
+.opt-weight{font-size:11px;color:var(--muted)}
 
 /* ── REST / DONE ─────────────────────────────────────────────────────────── */
-.rest-card { text-align: center; padding: 64px 24px; color: var(--muted); }
-.rest-icon { font-size: 52px; margin-bottom: 20px; display: block; }
-.rest-title { font-family: 'Bebas Neue', sans-serif; font-size: 34px; letter-spacing: 2px; color: var(--muted); margin-bottom: 10px; }
-.rest-sub { font-size: 14px; line-height: 1.7; color: var(--muted); }
-.done-banner {
-  display: none;
-  background: linear-gradient(135deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.03) 100%);
-  border: 1px solid rgba(255,255,255,0.15);
-  border-radius: var(--radius);
-  padding: 16px 20px;
-  text-align: center;
-  margin-bottom: 14px;
-}
-.done-banner.show { display: block; }
-.done-banner p { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 2px; color: var(--green); }
-.done-banner span { font-size: 13px; color: var(--text2); display: block; margin-top: 4px; }
-.save-workout-wrap { padding: 4px 14px 12px; }
-.save-workout-btn {
-  width: 100%;
-  padding: 16px;
-  background: var(--green);
-  border: none;
-  border-radius: var(--radius);
-  color: #0a0a0a;
-  font-size: 16px;
-  font-weight: 800;
-  cursor: pointer;
-  letter-spacing: 0.5px;
-  transition: opacity 0.2s, transform 0.1s;
-}
-.save-workout-btn:active { opacity: 0.85; transform: scale(0.99); }
+.rest-card{text-align:center;padding:60px 20px;color:var(--muted)}
+.rest-icon{font-size:48px;margin-bottom:16px;display:block}
+.rest-title{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:2px;color:var(--rest);margin-bottom:8px}
+.rest-sub{font-size:14px;line-height:1.6}
+.done-banner{display:none;background:rgba(78,203,127,0.1);border:1px solid rgba(78,203,127,0.3);border-radius:12px;padding:14px 20px;text-align:center;margin-bottom:12px}
+.done-banner.show{display:block}
+.done-banner p{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1.5px;color:var(--check)}
+.done-banner span{font-size:13px;color:var(--muted);font-family:'DM Sans',sans-serif;display:block;margin-top:4px}
+.save-workout-wrap{padding:4px 16px 12px}
+.save-workout-btn{width:100%;padding:14px;background:rgba(78,203,127,0.12);border:1px solid rgba(78,203,127,0.3);border-radius:12px;color:var(--check);font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:1.5px;cursor:pointer;transition:background .2s}
+.save-workout-btn:active{background:rgba(78,203,127,0.22)}
+
+/* ── STATS ───────────────────────────────────────────────────────────────── */
+.stats-section{padding:16px}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 14px}
+.stat-value{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:1px}
+.stat-label{font-size:11px;color:var(--muted);margin-top:2px}
+.stat-card.accent{border-color:rgba(245,166,35,0.3);background:rgba(245,166,35,0.05)}
+.stat-card.accent .stat-value{color:var(--gold)}
+.pr-item{display:flex;justify-content:space-between;align-items:center;padding:11px 14px;background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:8px}
+.pr-ex-name{font-size:13px;color:var(--text)}
+.pr-ex-val{font-size:12px;color:var(--gold);font-weight:600}
+.pr-ex-date{font-size:10px;color:var(--muted);margin-top:2px}
+.chart-wrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:16px}
+.chart-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:12px}
+.bar-chart{display:flex;align-items:flex-end;gap:6px;height:80px}
+.bar-col{display:flex;flex-direction:column;align-items:center;flex:1;gap:4px}
+.bar{border-radius:4px 4px 0 0;background:var(--check);min-height:4px;width:100%}
+.bar-label{font-size:9px;color:var(--muted);text-align:center}
 
 /* ── HISTORY ─────────────────────────────────────────────────────────────── */
-.history-filters { padding: 12px 14px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
-.history-search {
-  width: 100%;
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 10px 14px;
-  color: var(--text);
-  font-size: 14px;
-  outline: none;
-  margin-bottom: 10px;
-}
-.history-search::placeholder { color: var(--muted); }
-.history-search:focus { border-color: var(--green); }
-.filter-chip {
-  padding: 5px 14px;
-  border-radius: 20px;
-  border: 1px solid var(--border);
-  background: var(--surface);
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-.filter-chip.active { background: var(--surface3); color: var(--text); border-color: var(--border2); }
-.history-empty { text-align: center; padding: 64px 20px; color: var(--muted); }
-.history-empty-icon { font-size: 44px; margin-bottom: 14px; }
-.history-empty-text { font-size: 14px; line-height: 1.7; }
-.history-entry {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  margin-bottom: 10px;
-  overflow: hidden;
-}
-.history-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 14px 16px;
-  gap: 12px;
-}
-.history-date { font-size: 13px; font-weight: 700; color: var(--text); }
-.history-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
-.history-type-badge {
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  padding: 4px 10px;
-  border-radius: 20px;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-.history-body { padding: 0 16px 12px; border-top: 1px solid var(--border); }
-.history-ex {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  padding: 8px 0;
-  border-bottom: 1px solid var(--border);
-  font-size: 13px;
-  gap: 8px;
-}
-.history-ex:last-child { border-bottom: none; }
-.history-ex-name { color: var(--text); font-weight: 500; }
-.history-ex-weight { color: var(--text2); font-size: 12px; }
-.history-note { font-size: 11px; color: var(--blue); font-style: italic; padding: 2px 0 4px; }
-.history-del-btn {
-  display: block;
-  width: 100%;
-  padding: 10px;
-  text-align: center;
-  font-size: 12px;
-  color: var(--red);
-  background: none;
-  border: none;
-  border-top: 1px solid var(--border);
-  cursor: pointer;
-}
-.history-edit-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 16px;
-  border-bottom: 1px solid var(--border);
-  background: var(--surface);
-}
-.history-edit-label { font-size: 12px; font-weight: 600; color: var(--text2); }
-.history-edit-toggle {
-  font-size: 12px;
-  font-weight: 600;
-  padding: 6px 14px;
-  border-radius: 20px;
-  border: 1.5px solid var(--border);
-  background: var(--surface2);
-  color: var(--muted);
-  cursor: pointer;
-}
-.history-edit-toggle.active { border-color: rgba(167,139,250,0.4); color: var(--purple); background: var(--purple-dim); }
-.history-entry.editable .history-header { background: rgba(167,139,250,0.04); }
-.history-edit-actions { display: flex; gap: 6px; padding: 8px 16px 10px; border-top: 1px solid var(--border); }
-.hist-action-btn {
-  flex: 1;
-  padding: 9px 6px;
-  border: none;
-  border-radius: var(--radius-sm);
-  font-size: 12px;
-  font-weight: 700;
-  cursor: pointer;
-  text-align: center;
-}
-.hist-action-btn.edit { background: var(--purple-dim); color: var(--purple); }
-.hist-action-btn.del { background: var(--red-dim); color: var(--red); }
-.hist-add-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 12px 16px;
-  border: 1.5px dashed rgba(255,255,255,0.18);
-  border-radius: var(--radius);
-  color: var(--green);
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  background: var(--green-dim);
-  margin: 0 0 12px;
-  transition: background 0.2s;
-}
-.hist-add-btn:active { background: rgba(255,255,255,0.10); }
+.history-empty{text-align:center;padding:60px 20px;color:var(--muted)}
+.history-empty-icon{font-size:40px;margin-bottom:12px}
+.history-empty-text{font-size:14px;line-height:1.6}
+.history-entry{background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:12px;overflow:hidden}
+.history-header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--border)}
+.history-date{font-size:13px;font-weight:500;color:var(--text)}
+.history-meta{font-size:12px;color:var(--muted);margin-top:2px}
+.history-type-badge{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;padding:3px 9px;border-radius:10px;white-space:nowrap}
+.history-body{padding:10px 16px}
+.history-ex{display:flex;justify-content:space-between;align-items:baseline;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px;gap:8px}
+.history-ex:last-child{border-bottom:none}
+.history-ex-name{color:var(--text)}
+.history-ex-weight{color:var(--muted);font-size:12px}
+.history-note{font-size:11px;color:var(--pull);font-style:italic;padding:2px 0 4px}
+.history-del-btn{display:block;width:100%;padding:10px;text-align:center;font-size:12px;color:var(--danger);background:none;border:none;border-top:1px solid var(--border);cursor:pointer;font-family:'DM Sans',sans-serif}
 
-/* ── LOG EDITOR ──────────────────────────────────────────────────────────── */
-.log-ex-editor {
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 10px 12px;
-  margin-bottom: 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-.log-ex-row { display: flex; gap: 8px; align-items: center; }
-.log-ex-name-input {
-  flex: 1;
-  background: var(--surface3);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-xs);
-  padding: 8px 10px;
-  color: var(--text);
-  font-size: 13px;
-  outline: none;
-}
-.log-ex-name-input:focus { border-color: rgba(167,139,250,0.4); }
-.log-ex-weight-input {
-  width: 110px;
-  background: var(--surface3);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-xs);
-  padding: 8px 10px;
-  color: var(--text);
-  font-size: 13px;
-  outline: none;
-}
-.log-ex-weight-input:focus { border-color: var(--green-glow); }
-.log-ex-del { background: none; border: none; color: var(--red); font-size: 16px; cursor: pointer; padding: 4px; flex-shrink: 0; opacity: 0.7; }
-.log-ex-del:active { opacity: 1; }
-.log-add-ex-btn {
-  width: 100%;
-  padding: 9px;
-  background: none;
-  border: 1.5px dashed var(--border2);
-  border-radius: var(--radius-xs);
-  color: var(--purple);
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  margin-top: 2px;
-}
+/* ── HISTORY EDIT MODE ───────────────────────────────────────────────────── */
+.history-edit-bar{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid var(--border);background:rgba(181,122,255,0.06)}
+.history-edit-label{font-size:12px;font-weight:600;color:var(--upper);letter-spacing:.04em}
+.history-edit-toggle{font-size:12px;font-weight:600;padding:6px 14px;border-radius:20px;border:1.5px solid var(--border);background:var(--surface2);color:var(--muted);cursor:pointer;transition:all .2s}
+.history-edit-toggle.active{border-color:rgba(181,122,255,0.5);color:var(--upper);background:rgba(181,122,255,0.08)}
+.history-entry.editable .history-header{background:rgba(181,122,255,0.04)}
+.history-edit-actions{display:flex;gap:6px;padding:8px 16px 2px;border-top:1px solid var(--border)}
+.hist-action-btn{flex:1;padding:9px 6px;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:opacity .2s;text-align:center}
+.hist-action-btn.edit{background:rgba(181,122,255,0.12);color:var(--upper)}
+.hist-action-btn.del{background:rgba(224,80,80,0.1);color:var(--danger)}
+.hist-add-btn{display:flex;align-items:center;justify-content:center;gap:6px;padding:12px 16px;border:1.5px dashed rgba(78,203,127,0.3);border-radius:12px;color:var(--check);font-size:13px;font-weight:500;cursor:pointer;background:rgba(78,203,127,0.04);margin:0 0 12px;transition:background .2s}
+.hist-add-btn:active{background:rgba(78,203,127,0.1)}
 
-/* ── STATS ────────────────────────────────────────────────────────────────── */
-.stats-section { padding: 16px; }
-.stats-range-tabs { display: flex; gap: 4px; margin-bottom: 16px; background: var(--surface2); border-radius: var(--radius-sm); padding: 3px; }
-.stats-range-tab {
-  flex: 1;
-  text-align: center;
-  padding: 8px;
-  border-radius: 8px;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--muted);
-  cursor: pointer;
-  transition: all 0.2s;
-}
-.stats-range-tab.active { background: var(--surface3); color: var(--text); }
-.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
-.stat-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 18px 16px;
-}
-.stat-value { font-size: 36px; font-weight: 900; letter-spacing: -1px; color: var(--text); line-height: 1; }
-.stat-label { font-size: 11px; font-weight: 600; color: var(--muted); margin-top: 6px; text-transform: uppercase; letter-spacing: 0.08em; }
-.stat-card.accent { border-color: rgba(251,191,36,0.2); background: var(--gold-dim); }
-.stat-card.accent .stat-value { color: var(--gold); }
-.chart-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 14px; }
-.chart-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 14px; }
-.bar-chart { display: flex; align-items: flex-end; gap: 6px; height: 80px; }
-.bar-col { display: flex; flex-direction: column; align-items: center; flex: 1; gap: 4px; }
-.bar { border-radius: 4px 4px 0 0; min-height: 4px; width: 100%; transition: height 0.4s ease; }
-.bar-label { font-size: 9px; color: var(--muted); text-align: center; }
-.volume-chart { }
-.volume-bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
-.volume-bar-label { font-size: 11px; color: var(--text2); width: 80px; flex-shrink: 0; text-transform: capitalize; font-weight: 500; }
-.volume-bar-track { flex: 1; height: 8px; background: var(--surface3); border-radius: 4px; overflow: hidden; }
-.volume-bar-fill { height: 100%; border-radius: 4px; transition: width 0.5s ease; }
-.volume-bar-count { font-size: 11px; color: var(--muted); width: 24px; text-align: right; flex-shrink: 0; }
-.pr-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 14px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  margin-bottom: 8px;
-}
-.pr-ex-name { font-size: 13px; font-weight: 600; color: var(--text); }
-.pr-ex-val { font-size: 13px; color: var(--gold); font-weight: 700; }
-.pr-ex-date { font-size: 10px; color: var(--muted); margin-top: 2px; }
+/* ── LOG EDITOR MODAL ────────────────────────────────────────────────────── */
+.log-ex-editor{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:8px;display:flex;flex-direction:column;gap:6px}
+.log-ex-row{display:flex;gap:8px;align-items:center}
+.log-ex-name-input{flex:1;background:var(--surface3);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none}
+.log-ex-name-input:focus{border-color:rgba(181,122,255,0.5)}
+.log-ex-weight-input{width:110px;background:var(--surface3);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none}
+.log-ex-weight-input:focus{border-color:rgba(78,203,127,0.5)}
+.log-ex-del{background:none;border:none;color:var(--danger);font-size:16px;cursor:pointer;padding:4px;flex-shrink:0;opacity:.7}
+.log-ex-del:active{opacity:1}
+.log-add-ex-btn{width:100%;padding:9px;background:none;border:1.5px dashed var(--border);border-radius:8px;color:var(--upper);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;margin-top:2px}
+
+/* ── MULTI-SET TRACKING ──────────────────────────────────────────────────── */
+.ex-note-row{padding:4px 10px 10px}
+
+/* ── COMMUNITY SUBMIT MODAL ──────────────────────────────────────────────── */
+.community-badge{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;border-radius:6px;background:rgba(245,166,35,0.12);color:var(--gold);border:1px solid rgba(245,166,35,0.25)}
+.community-use-count{font-size:11px;color:var(--muted)}
+
+/* ── SETTINGS ────────────────────────────────────────────────────────────── */
+.settings-section{padding:16px}
+.settings-label{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.settings-label::after{content:'';flex:1;height:1px;background:var(--border)}
+.settings-row{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;background:var(--surface);border-radius:10px;margin-bottom:8px}
+.settings-row-label{font-size:14px;color:var(--text)}
+.settings-row-sub{font-size:12px;color:var(--muted);margin-top:2px}
+.danger-btn{width:100%;padding:13px;background:rgba(224,80,80,0.1);border:1px solid rgba(224,80,80,0.25);border-radius:10px;color:var(--danger);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:background .2s;margin-top:4px}
+.danger-btn:active{background:rgba(224,80,80,0.2)}
 
 /* ── LIBRARY ─────────────────────────────────────────────────────────────── */
-.library-search-wrap { padding: 12px 14px; border-bottom: 1px solid var(--border); }
-.library-search {
-  width: 100%;
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 10px 14px;
-  color: var(--text);
-  font-size: 14px;
-  outline: none;
-}
-.library-search::placeholder { color: var(--muted); }
-.library-search:focus { border-color: var(--green); }
-.muscle-tabs { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding: 10px 14px; border-bottom: 1px solid var(--border); }
-.muscle-tabs::-webkit-scrollbar { display: none; }
-.muscle-tab {
-  padding: 6px 14px;
-  border-radius: 20px;
-  border: 1px solid var(--border);
-  background: var(--surface);
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: all 0.15s;
-  flex-shrink: 0;
-}
-.muscle-tab.active { background: var(--surface3); color: var(--text); border-color: var(--border2); }
-.library-list { padding: 10px 14px; }
-.library-ex-item {
-  display: flex;
-  align-items: center;
-  padding: 12px 14px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  margin-bottom: 8px;
-  gap: 10px;
-}
-.library-ex-left { flex: 1; min-width: 0; }
-.library-ex-name { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 5px; }
-.library-ex-meta { display: flex; gap: 5px; flex-wrap: wrap; }
-.lib-tag { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; padding: 2px 7px; border-radius: 4px; }
-.lib-tag.muscle { background: var(--green-dim); color: var(--green); }
-.lib-tag.equip { background: var(--blue-dim); color: var(--blue); }
-.lib-tag.cat { background: var(--purple-dim); color: var(--purple); }
-.lib-tag.custom { background: var(--orange-dim); color: var(--orange); }
-.library-empty { text-align: center; padding: 40px 20px; color: var(--muted); font-size: 14px; }
+.library-search-wrap{padding:14px 16px;border-bottom:1px solid var(--border)}
+.library-search{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;outline:none}
+.library-search::placeholder{color:var(--muted)}
+.muscle-tabs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:10px 16px;border-bottom:1px solid var(--border)}
+.muscle-tabs::-webkit-scrollbar{display:none}
+.muscle-tab{padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:var(--surface);color:var(--muted);font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;transition:all .15s;flex-shrink:0}
+.muscle-tab.active{background:var(--surface2);color:var(--text);border-color:rgba(255,255,255,0.2)}
+.library-list{padding:10px 16px}
+.library-ex-item{display:flex;align-items:center;padding:12px 14px;background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:8px;gap:10px}
+.library-ex-left{flex:1;min-width:0}
+.library-ex-name{font-size:14px;color:var(--text);margin-bottom:4px}
+.library-ex-meta{display:flex;gap:5px;flex-wrap:wrap}
+.lib-tag{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;border-radius:6px}
+.lib-tag.muscle{background:rgba(78,203,127,0.12);color:var(--check)}
+.lib-tag.equip{background:rgba(74,158,255,0.12);color:var(--pull)}
+.lib-tag.cat{background:rgba(181,122,255,0.12);color:var(--upper)}
+.lib-tag.custom{background:rgba(232,97,58,0.12);color:var(--push)}
+.library-empty{text-align:center;padding:40px 20px;color:var(--muted);font-size:14px}
 
-/* ── SETTINGS ─────────────────────────────────────────────────────────────── */
-.settings-section { padding: 16px; }
-.settings-label {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-bottom: 10px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.settings-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
-.settings-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 14px 16px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  margin-bottom: 8px;
-  gap: 12px;
-}
-.settings-row-label { font-size: 14px; font-weight: 600; color: var(--text); }
-.settings-row-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
-.danger-btn {
-  width: 100%;
-  padding: 14px;
-  background: var(--red-dim);
-  border: 1px solid rgba(248,113,113,0.2);
-  border-radius: var(--radius);
-  color: var(--red);
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s;
-  margin-top: 4px;
-}
-.danger-btn:active { background: rgba(248,113,113,0.2); }
-
-/* ── BOTTOM NAV ──────────────────────────────────────────────────────────── */
-.bottom-nav {
-  display: flex;
-  background: rgba(10,10,10,0.97);
-  backdrop-filter: blur(20px);
-  border-top: 1px solid var(--border);
-  padding-bottom: var(--safe-bottom);
-  height: calc(var(--nav-h) + var(--safe-bottom));
-  flex-shrink: 0;
-  position: sticky;
-  bottom: 0;
-  z-index: 50;
-}
-.nav-item {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 10px 4px;
-  position: relative;
-  transition: opacity 0.15s;
-}
-.nav-item:active { opacity: 0.7; }
-.nav-icon { font-size: 22px; line-height: 1; }
-.nav-label { font-size: 10px; font-weight: 600; color: var(--muted); letter-spacing: 0.03em; }
-.nav-item.active .nav-label { color: var(--green); }
-.nav-item.active::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 32px;
-  height: 2px;
-  background: var(--green);
-  border-radius: 0 0 2px 2px;
-}
-
-/* ── REST TIMER ──────────────────────────────────────────────────────────── */
-.rest-timer-fab {
-  position: fixed;
-  bottom: calc(var(--nav-h) + var(--safe-bottom) + 16px);
-  right: 16px;
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  background: var(--surface2);
-  border: 1.5px solid var(--border2);
-  display: none;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  z-index: 100;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.5);
-  transition: transform 0.2s;
-}
-.rest-timer-fab.visible { display: flex; }
-.rest-timer-fab:active { transform: scale(0.93); }
-.rest-timer-fab span { font-size: 20px; line-height: 1; }
-.fab-label { font-size: 8px; font-weight: 700; color: var(--muted); letter-spacing: 0.05em; margin-top: 1px; }
-.rest-timer-sheet {
-  position: fixed;
-  inset: 0;
-  z-index: 200;
-  background: rgba(0,0,0,0.85);
-  backdrop-filter: blur(10px);
-  display: none;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 40px 24px;
-}
-.rest-timer-sheet.open { display: flex; }
-.rest-timer-handle { width: 36px; height: 4px; border-radius: 2px; background: var(--surface4); margin-bottom: 32px; }
-.rest-timer-label { font-size: 12px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
-.rest-timer-display { font-family: 'Bebas Neue', sans-serif; font-size: 96px; letter-spacing: 4px; color: var(--text); line-height: 1; margin-bottom: 28px; }
-.rest-timer-presets { display: flex; gap: 10px; margin-bottom: 32px; }
-.rest-preset-btn {
-  padding: 8px 18px;
-  border-radius: 20px;
-  border: 1.5px solid var(--border2);
-  background: var(--surface2);
-  color: var(--text2);
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-.rest-preset-btn.active { background: var(--green-dim); border-color: var(--green); color: var(--green); }
-.rest-timer-actions { display: flex; gap: 12px; width: 100%; max-width: 320px; }
-.rest-timer-btn {
-  flex: 1;
-  padding: 15px;
-  border-radius: var(--radius);
-  border: none;
-  font-size: 15px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: opacity 0.2s;
-}
-.rest-timer-btn.primary { background: var(--green); color: #0a0a0a; }
-.rest-timer-btn.secondary { background: var(--surface2); color: var(--text2); border: 1px solid var(--border2); }
-.rest-timer-btn:active { opacity: 0.8; }
-
-/* ── TOAST ────────────────────────────────────────────────────────────────── */
-.toast {
-  position: fixed;
-  bottom: calc(var(--nav-h) + var(--safe-bottom) + 14px);
-  left: 50%;
-  transform: translateX(-50%) translateY(20px);
-  background: var(--surface3);
-  border: 1px solid var(--border2);
-  color: var(--text);
-  padding: 11px 20px;
-  border-radius: 24px;
-  font-size: 13px;
-  font-weight: 600;
-  opacity: 0;
-  transition: opacity 0.2s, transform 0.2s;
-  z-index: 500;
-  white-space: nowrap;
-  pointer-events: none;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-  max-width: calc(100vw - 32px);
-}
-.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: all; }
-
-/* ── CONFIRM ──────────────────────────────────────────────────────────────── */
-.confirm-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 400;
-  background: rgba(0,0,0,0.8);
-  backdrop-filter: blur(8px);
-  display: none;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-}
-.confirm-overlay.show { display: flex; }
-.confirm-card {
-  background: var(--surface);
-  border: 1px solid var(--border2);
-  border-radius: 20px;
-  padding: 28px 24px;
-  width: 100%;
-  max-width: 340px;
-  box-shadow: 0 24px 64px rgba(0,0,0,0.6);
-}
-.confirm-title { font-size: 18px; font-weight: 800; color: var(--text); margin-bottom: 8px; }
-.confirm-body { font-size: 14px; color: var(--text2); margin-bottom: 24px; line-height: 1.5; }
-.confirm-actions { display: flex; gap: 10px; }
-.confirm-btn {
-  flex: 1;
-  padding: 13px;
-  border-radius: var(--radius);
-  border: none;
-  font-size: 14px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: opacity 0.2s;
-}
-.confirm-btn.cancel { background: var(--surface2); color: var(--text2); border: 1px solid var(--border2); }
-.confirm-btn.danger { background: var(--red); color: #fff; }
-.confirm-btn:active { opacity: 0.8; }
-
-/* ── MODALS ───────────────────────────────────────────────────────────────── */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 300;
-  background: rgba(0,0,0,0.7);
-  backdrop-filter: blur(6px);
-  display: flex;
-  align-items: flex-end;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s;
-}
-.modal-overlay.open { opacity: 1; pointer-events: all; }
-.modal-sheet {
-  width: 100%;
-  background: var(--surface);
-  border-radius: 22px 22px 0 0;
-  padding: 20px 20px calc(var(--safe-bottom) + 20px);
-  transform: translateY(100%);
-  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  max-height: 92vh;
-  overflow-y: auto;
-}
-.modal-overlay.open .modal-sheet { transform: translateY(0); }
-.modal-handle { width: 36px; height: 4px; border-radius: 2px; background: var(--surface4); margin: 0 auto 20px; }
-.modal-title { font-size: 20px; font-weight: 900; color: var(--text); margin-bottom: 6px; letter-spacing: -0.3px; }
-.modal-sub { font-size: 13px; color: var(--text2); margin-bottom: 16px; }
-.modal-input {
-  width: 100%;
-  background: var(--surface2);
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 13px 14px;
-  color: var(--text);
-  font-size: 15px;
-  outline: none;
-  margin-bottom: 8px;
-  transition: border-color 0.2s;
-}
-.modal-input:focus { border-color: var(--purple); }
-.modal-input::placeholder { color: var(--muted); }
-.modal-label { font-size: 12px; font-weight: 600; color: var(--muted); display: block; margin-bottom: 6px; margin-top: 10px; }
-.modal-select {
-  width: 100%;
-  background: var(--surface2);
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 13px 14px;
-  color: var(--text);
-  font-size: 15px;
-  outline: none;
-  margin-bottom: 8px;
-  -webkit-appearance: none;
-}
-.modal-btn {
-  width: 100%;
-  padding: 14px;
-  border-radius: var(--radius-sm);
-  font-size: 15px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: opacity 0.2s;
-  margin-bottom: 8px;
-  border: none;
-}
-.modal-btn.primary { background: var(--purple); color: #fff; }
-.modal-btn.green { background: var(--green); color: #0a0a0a; }
-.modal-btn.secondary { background: var(--surface2); color: var(--text2); border: 1px solid var(--border2); }
-.modal-btn:active { opacity: 0.8; }
-
-/* ── PICKER MODAL ────────────────────────────────────────────────────────── */
-.picker-search {
-  width: 100%;
-  background: var(--surface2);
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 11px 14px;
-  color: var(--text);
-  font-size: 14px;
-  outline: none;
-  margin-bottom: 10px;
-}
-.picker-search:focus { border-color: var(--green); }
-.picker-search::placeholder { color: var(--muted); }
-.picker-muscle-tabs { display: flex; gap: 5px; overflow-x: auto; scrollbar-width: none; margin-bottom: 12px; padding-bottom: 2px; }
-.picker-muscle-tabs::-webkit-scrollbar { display: none; }
-.picker-tab {
-  padding: 5px 12px;
-  border-radius: 20px;
-  border: 1px solid var(--border);
-  background: var(--surface2);
-  color: var(--muted);
-  font-size: 11px;
-  font-weight: 600;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: all 0.15s;
-  flex-shrink: 0;
-}
-.picker-tab.active { background: var(--green); color: #0a0a0a; border-color: var(--green); }
-.picker-results { max-height: 300px; overflow-y: auto; margin-bottom: 12px; }
-.picker-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 11px 12px;
-  background: var(--surface2);
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-sm);
-  margin-bottom: 6px;
-  cursor: pointer;
-  transition: border-color 0.15s;
-}
-.picker-item.selected { border-color: var(--green); background: var(--green-dim); }
-.picker-item-radio {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  border: 2px solid var(--border2);
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.15s;
-}
-.picker-item.selected .picker-item-radio { border-color: var(--green); background: var(--green); }
-.picker-item-radio-dot { width: 5px; height: 5px; border-radius: 50%; background: #0a0a0a; opacity: 0; }
-.picker-item.selected .picker-item-radio-dot { opacity: 1; }
-.picker-item-info { flex: 1; min-width: 0; }
-.picker-item-name { font-size: 13px; font-weight: 600; color: var(--text); }
-.picker-item.selected .picker-item-name { color: var(--green); }
-.picker-item-meta { font-size: 10px; color: var(--muted); margin-top: 2px; }
-.picker-none { text-align: center; padding: 24px; color: var(--muted); font-size: 13px; }
-.picker-weight-input {
-  width: 100%;
-  background: var(--surface2);
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 12px 14px;
-  color: var(--text);
-  font-size: 15px;
-  outline: none;
-  margin-bottom: 8px;
-}
-.picker-weight-input:focus { border-color: var(--green); }
-
-/* ── PROGRAM MODAL ───────────────────────────────────────────────────────── */
-.prog-modal-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 300;
-  background: rgba(0,0,0,0.7);
-  backdrop-filter: blur(6px);
-  display: flex;
-  align-items: flex-end;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s;
-}
-.prog-modal-overlay.open { opacity: 1; pointer-events: all; }
-.prog-modal-sheet {
-  width: 100%;
-  background: var(--surface);
-  border-radius: 22px 22px 0 0;
-  padding: 20px 20px calc(var(--safe-bottom) + 20px);
-  transform: translateY(100%);
-  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  max-height: 75vh;
-  overflow-y: auto;
-}
-.prog-modal-overlay.open .prog-modal-sheet { transform: translateY(0); }
-.prog-modal-handle { width: 36px; height: 4px; border-radius: 2px; background: var(--surface4); margin: 0 auto 16px; }
-.prog-modal-title { font-size: 18px; font-weight: 900; color: var(--text); margin-bottom: 16px; letter-spacing: -0.2px; }
-.prog-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 13px 16px;
-  background: var(--surface2);
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius);
-  margin-bottom: 8px;
-  gap: 12px;
-  cursor: pointer;
-  transition: border-color 0.15s;
-}
-.prog-item.active { border-color: var(--green); background: var(--green-dim); }
-.prog-item-name { font-size: 14px; font-weight: 700; color: var(--text); }
-.prog-item.active .prog-item-name { color: var(--green); }
-.prog-item-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
-.prog-item-badge {
-  font-size: 10px;
-  font-weight: 700;
-  padding: 3px 9px;
-  border-radius: 10px;
-  background: var(--green-dim);
-  color: var(--green);
-  flex-shrink: 0;
-}
-.prog-item-del { background: none; border: none; color: var(--red); font-size: 18px; cursor: pointer; padding: 4px; opacity: 0.6; flex-shrink: 0; }
-.prog-item-del:active { opacity: 1; }
-.prog-add-btn {
-  width: 100%;
-  padding: 13px;
-  background: none;
-  border: 1.5px dashed var(--border2);
-  border-radius: var(--radius);
-  color: var(--green);
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  margin-top: 4px;
-}
-.prog-list { }
-
-/* ── GROUP SETTINGS PICK COUNTS ──────────────────────────────────────────── */
-.pick-count-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
-.pick-count-btn {
-  padding: 6px 14px;
-  border-radius: 20px;
-  border: 1.5px solid var(--border);
-  background: var(--surface2);
-  color: var(--text2);
-  font-size: 14px;
-  font-weight: 700;
-  cursor: pointer;
-}
-.pick-count-btn.active { background: var(--green-dim); border-color: var(--green); color: var(--green); }
-
-/* ── COMMUNITY ───────────────────────────────────────────────────────────── */
-.community-badge {
-  font-size: 9px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
-  padding: 2px 7px;
-  border-radius: 4px;
-  background: var(--gold-dim);
-  color: var(--gold);
-  border: 1px solid rgba(251,191,36,0.25);
-}
-.community-use-count { font-size: 11px; color: var(--muted); }
-
-/* ── RESPONSIVE + TRANSITIONS ────────────────────────────────────────────── */
-@media (min-width: 480px) {
-  #appShell { max-width: 480px; margin: 0 auto; }
-  .bottom-nav { max-width: 480px; }
-  .top-bar { max-width: 480px; }
-}
-
-/* smooth fade for page transitions */
-.page { animation: pageFade 0.15s ease; }
-@keyframes pageFade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+/* ── MODAL ───────────────────────────────────────────────────────────────── */
+.modal-overlay{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,0.75);backdrop-filter:blur(4px);display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal-sheet{width:100%;background:var(--surface);border-radius:20px 20px 0 0;padding:20px 20px calc(var(--safe-bottom) + 20px);transform:translateY(100%);transition:transform .25s ease;max-height:92vh;overflow-y:auto}
+.modal-overlay.open .modal-sheet{transform:translateY(0)}
+.modal-handle{width:36px;height:4px;border-radius:2px;background:var(--surface3);margin:0 auto 20px}
+.modal-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1.5px;margin-bottom:6px}
+.modal-sub{font-size:13px;color:var(--muted);margin-bottom:16px}
+.modal-input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;outline:none;margin-bottom:8px;transition:border-color .2s}
+.modal-input:focus{border-color:rgba(181,122,255,0.5)}
+.modal-label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px;margin-top:8px}
+.modal-select{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;outline:none;margin-bottom:8px;-webkit-appearance:none}
+.modal-btn{width:100%;padding:14px;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;cursor:pointer;transition:opacity .2s;margin-bottom:8px;border:none}
+.modal-btn.primary{background:var(--upper);color:#fff}
+.modal-btn.green{background:var(--check);color:#0f0f0f}
+.modal-btn.secondary{background:var(--surface2);color:var(--muted);border:1px solid var(--border)}
+.modal-btn:active{opacity:.8}
+.edit-hint{background:rgba(181,122,255,0.08);border:1px solid rgba(181,122,255,0.2);border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:13px;color:var(--upper)}
+.picker-search{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;margin-bottom:10px}
+.picker-muscle-tabs{display:flex;gap:5px;overflow-x:auto;scrollbar-width:none;margin-bottom:12px;padding-bottom:2px}
+.picker-muscle-tabs::-webkit-scrollbar{display:none}
+.picker-tab{padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);font-size:11px;font-weight:500;cursor:pointer;white-space:nowrap;transition:all .15s;flex-shrink:0}
+.picker-tab.active{background:var(--check);color:#0f0f0f;border-color:var(--check)}
+.picker-results{max-height:300px;overflow-y:auto;margin-bottom:12px}
+.picker-item{display:flex;align-items:center;gap:10px;padding:11px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;margin-bottom:6px;cursor:pointer;transition:border-color .15s}
+.picker-item.selected{border-color:var(--check);background:rgba(78,203,127,0.06)}
+.picker-item-radio{width:18px;height:18px;border-radius:50%;border:2px solid rgba(255,255,255,0.18);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.picker-item.selected .picker-item-radio{border-color:var(--check);background:var(--check)}
+.picker-item-radio-dot{width:5px;height:5px;border-radius:50%;background:#0f0f0f;opacity:0;transition:opacity .15s}
+.picker-item.selected .picker-item-radio-dot{opacity:1}
+.picker-item-info{flex:1;min-width:0}
+.picker-item-name{font-size:13px;color:var(--text)}
+.picker-item.selected .picker-item-name{color:var(--check)}
+.picker-item-meta{font-size:10px;color:var(--muted);margin-top:2px}
+.picker-none{text-align:center;padding:24px;color:var(--muted);font-size:13px}
+.picker-weight-input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;outline:none;margin-bottom:8px}
+.picker-weight-input:focus{border-color:var(--check)}
 </style>
 </head>
 <body>
 
-<!-- ── AUTH SCREEN ─────────────────────────────────────────────────────── -->
+<!-- ── AUTH SCREEN ───────────────────────────────────────────────────────── -->
 <div id="authScreen">
-  <div class="auth-wordmark">MY SPLIT</div>
-  <div class="auth-tagline">Built for the gym. Built for you.</div>
+  <div class="auth-logo">MY SPLIT</div>
+  <div class="auth-tagline">Track. Progress. Dominate.</div>
   <div class="auth-card">
     <div class="auth-tabs">
       <div class="auth-tab active" id="tabLogin" onclick="switchAuthTab('login')">Sign In</div>
@@ -1459,124 +418,123 @@ body.offline .offline-banner { display: block; }
     </div>
     <div id="registerForm" style="display:none">
       <input class="auth-input" id="regEmail" placeholder="Email" type="email" autocomplete="email">
-      <input class="auth-input" id="regUsername" placeholder="Username" autocomplete="username">
-      <input class="auth-input" id="regPassword" placeholder="Password (8+ chars)" type="password" autocomplete="new-password">
+      <input class="auth-input" id="regUsername" placeholder="Username">
+      <input class="auth-input" id="regPassword" placeholder="Password (min 8 chars)" type="password" autocomplete="new-password">
       <button class="auth-btn" onclick="doRegister()">Create Account</button>
     </div>
     <div class="auth-error" id="authError"></div>
   </div>
-  <div class="auth-offline">No internet? <a onclick="goOffline()">Use offline mode</a></div>
-  <div style="width:100%;max-width:380px;margin-top:12px;text-align:center">
-    <button onclick="goGuest()" style="width:100%;padding:13px;background:transparent;border:1.5px solid var(--border2);border-radius:var(--radius);color:var(--muted);font-size:14px;font-weight:600;cursor:pointer;letter-spacing:.3px">Continue as Guest →</button>
-    <div style="font-size:11px;color:var(--muted);margin-top:6px;opacity:.6">Saves locally · create an account anytime to sync</div>
-  </div>
+  <div class="auth-offline">No internet? <a onclick="goOffline()">Use offline mode</a><br>Your data stays on this device.</div>
 </div>
 
-<!-- ── PROGRAM BUILDER (unified: create + edit) ─────────────────────── -->
-<div id="programSetup" style="display:none;flex-direction:column;min-height:100vh;background:var(--bg);max-width:480px;margin:0 auto;box-sizing:border-box">
-
-  <!-- Header -->
-  <div style="display:flex;align-items:center;gap:12px;padding:20px 16px 12px;border-bottom:1px solid var(--border);flex-shrink:0">
-    <button id="builderBackBtn" onclick="builderBack()" style="background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;padding:0;line-height:1">←</button>
-    <div style="flex:1">
-      <div style="font-size:18px;font-weight:900;letter-spacing:-.3px;color:var(--text)" id="builderHeaderTitle">NEW SPLIT</div>
-      <div style="font-size:11px;color:var(--muted)">Name your split · add days · add exercises</div>
+<!-- ── PROGRAM SETUP SCREEN ───────────────────────────────────────────────── -->
+<div id="programSetup">
+  <div class="setup-logo">MY SPLIT</div>
+  <div class="setup-sub">Choose a template to get started</div>
+  <div class="setup-section-label">Select a Template</div>
+  <div class="template-grid" id="templateGrid">
+    <div class="template-card" data-tpl="ppl6" onclick="selectTemplate('ppl6')">
+      <div class="template-card-icon">💪</div>
+      <div class="template-card-body">
+        <div class="template-card-name">PPL — 6 Day Split</div>
+        <div class="template-card-desc">Push · Pull · Legs × 2/week<br>Marco's hypertrophy program</div>
+      </div>
+      <div class="template-card-check">✓</div>
     </div>
-    <button id="builderSaveBtn" onclick="builderSave()" style="background:var(--text);color:#000;border:none;border-radius:20px;padding:9px 18px;font-size:13px;font-weight:800;cursor:pointer;flex-shrink:0">Save</button>
-  </div>
-
-  <!-- Split name -->
-  <div style="padding:14px 16px 0">
-    <input id="builderName" placeholder="Split name (e.g. My PPL)" maxlength="40"
-      style="width:100%;box-sizing:border-box;background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:11px 14px;color:var(--text);font-size:15px;font-weight:700;outline:none;font-family:inherit"
-      onfocus="this.style.borderColor='var(--border2)'" onblur="this.style.borderColor='var(--border)'">
-  </div>
-
-  <!-- Template quick-fill -->
-  <div style="padding:10px 16px 0">
-    <div style="font-size:10px;font-weight:700;letter-spacing:.15em;color:var(--muted);text-transform:uppercase;margin-bottom:8px">Quick Templates</div>
-    <div style="display:flex;gap:6px;flex-wrap:wrap">
-      <button onclick="applyTemplate('ppl6')"   style="padding:6px 12px;border-radius:20px;border:1.5px solid var(--border);background:var(--surface2);color:var(--text2);font-size:12px;font-weight:600;cursor:pointer">PPL 6-Day</button>
-      <button onclick="applyTemplate('upper_lower')" style="padding:6px 12px;border-radius:20px;border:1.5px solid var(--border);background:var(--surface2);color:var(--text2);font-size:12px;font-weight:600;cursor:pointer">Upper/Lower 4-Day</button>
-      <button onclick="applyTemplate('fullbody')" style="padding:6px 12px;border-radius:20px;border:1.5px solid var(--border);background:var(--surface2);color:var(--text2);font-size:12px;font-weight:600;cursor:pointer">Full Body 3-Day</button>
+    <div class="template-card" data-tpl="upper_lower" onclick="selectTemplate('upper_lower')">
+      <div class="template-card-icon">🔀</div>
+      <div class="template-card-body">
+        <div class="template-card-name">Upper / Lower — 4 Day</div>
+        <div class="template-card-desc">Upper A · Lower A · Upper B · Lower B<br>Great for strength + size</div>
+      </div>
+      <div class="template-card-check">✓</div>
+    </div>
+    <div class="template-card" data-tpl="pplul" onclick="selectTemplate('pplul')">
+      <div class="template-card-icon">⚡</div>
+      <div class="template-card-body">
+        <div class="template-card-name">PPLUL — 5 Day Split</div>
+        <div class="template-card-desc">Push · Pull · Legs · Upper · Lower<br>High frequency, full coverage</div>
+      </div>
+      <div class="template-card-check">✓</div>
+    </div>
+    <div class="template-card" data-tpl="fullbody" onclick="selectTemplate('fullbody')">
+      <div class="template-card-icon">🌐</div>
+      <div class="template-card-body">
+        <div class="template-card-name">Full Body — 3 Day</div>
+        <div class="template-card-desc">Mon · Wed · Fri sessions<br>Efficient, balanced training</div>
+      </div>
+      <div class="template-card-check">✓</div>
+    </div>
+    <div class="template-card" data-tpl="custom" onclick="selectTemplate('custom')">
+      <div class="template-card-icon">✏️</div>
+      <div class="template-card-body">
+        <div class="template-card-name">Build My Own</div>
+        <div class="template-card-desc">Start blank, build from library<br>Full control over every day</div>
+      </div>
+      <div class="template-card-check">✓</div>
     </div>
   </div>
-
-  <!-- Days list -->
-  <div style="padding:14px 16px 0;flex:1;overflow-y:auto">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-      <div style="font-size:10px;font-weight:700;letter-spacing:.15em;color:var(--muted);text-transform:uppercase">Days in Queue</div>
-      <button onclick="builderAddDay()" style="background:var(--surface3);border:none;border-radius:8px;padding:5px 12px;color:var(--text);font-size:12px;font-weight:700;cursor:pointer">+ Add Day</button>
-    </div>
-    <div id="builderDayList" style="display:flex;flex-direction:column;gap:6px"></div>
+  <div class="setup-section-label">Name Your Split</div>
+  <div class="setup-name-wrap">
+    <input class="setup-name-input" id="setupProgramName" placeholder="e.g. My PPL Split" maxlength="40">
   </div>
+  <button class="setup-start-btn" id="setupStartBtn" onclick="createProgramFromSetup()">Start Training →</button>
 </div>
 
-<!-- ── DAY DETAIL EDITOR (slide-in panel) ────────────────────────────── -->
-<div id="dayDetailPanel" style="display:none;flex-direction:column;min-height:100vh;background:var(--bg);max-width:480px;margin:0 auto;box-sizing:border-box">
-  <!-- Header -->
-  <div style="display:flex;align-items:center;gap:12px;padding:20px 16px 12px;border-bottom:1px solid var(--border);flex-shrink:0">
-    <button onclick="closeDayDetail()" style="background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;padding:0;line-height:1">←</button>
-    <div id="dayDetailTitle" style="font-size:18px;font-weight:900;color:var(--text);flex:1">DAY</div>
+<!-- ── CUSTOM SPLIT BUILDER ────────────────────────────────────────────── -->
+<div id="customBuilder" style="display:none;flex-direction:column;min-height:100vh;background:var(--bg);padding:20px 16px 40px;box-sizing:border-box;max-width:480px;margin:0 auto">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px">
+    <button onclick="closeCustomBuilder()" style="background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;padding:0;line-height:1">←</button>
+    <div style="font-size:18px;font-weight:800;letter-spacing:.5px;color:var(--text)">BUILD YOUR SPLIT</div>
   </div>
+  <div style="font-size:13px;color:var(--muted);margin-bottom:20px;padding-left:34px">Drag days to reorder · tap a day to add exercises</div>
 
-  <div style="padding:14px 16px;flex:1;overflow-y:auto">
-    <!-- Day name -->
-    <div style="font-size:10px;font-weight:700;letter-spacing:.15em;color:var(--muted);text-transform:uppercase;margin-bottom:6px">Day Name</div>
-    <input id="dayDetailName" placeholder="e.g. Push, Chest & Tris..." maxlength="30" oninput="ddUpdateName()"
-      style="width:100%;box-sizing:border-box;background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;color:var(--text);font-size:14px;font-weight:600;outline:none;font-family:inherit;margin-bottom:14px"
-      onfocus="this.style.borderColor='var(--border2)'" onblur="this.style.borderColor='var(--border)'">
+  <!-- Step 1: day count -->
+  <div style="font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--upper);text-transform:uppercase;margin-bottom:8px">Training Days Per Week</div>
+  <div style="display:flex;gap:8px;margin-bottom:20px" id="cbDayCountRow"></div>
 
-    <!-- Day type -->
-    <div style="font-size:10px;font-weight:700;letter-spacing:.15em;color:var(--muted);text-transform:uppercase;margin-bottom:8px">Type</div>
-    <div id="dayDetailTypeRow" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:18px"></div>
+  <!-- Step 2: day schedule -->
+  <div style="font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--upper);text-transform:uppercase;margin-bottom:8px">Weekly Schedule</div>
+  <div id="cbSchedule" style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px"></div>
 
-    <!-- Exercises header -->
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-      <div style="font-size:10px;font-weight:700;letter-spacing:.15em;color:var(--muted);text-transform:uppercase">Exercises</div>
-      <button onclick="openDdExPicker()" style="background:var(--surface3);border:none;border-radius:8px;padding:5px 12px;color:var(--text);font-size:12px;font-weight:700;cursor:pointer">+ Add</button>
-    </div>
-    <div id="dayDetailExList" style="display:flex;flex-direction:column;gap:4px"></div>
+  <!-- Name -->
+  <div style="font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--upper);text-transform:uppercase;margin-bottom:8px">Split Name</div>
+  <input id="cbName" class="setup-name-input" placeholder="e.g. My PPL Split" maxlength="40" style="margin-bottom:20px">
 
-    <!-- Empty state -->
-    <div id="dayDetailEmpty" style="display:none;text-align:center;padding:24px;border:1.5px dashed var(--border);border-radius:12px;color:var(--muted);font-size:13px">
-      Tap "+ Add" to add exercises to this day
-    </div>
-  </div>
+  <button id="cbSaveBtn" onclick="saveCustomSplit()" style="background:var(--check);color:#000;border:none;border-radius:14px;padding:16px;font-size:16px;font-weight:800;cursor:pointer;width:100%;letter-spacing:.3px">Save Split →</button>
 </div>
 
-<!-- ── EXERCISE PICKER for Day Detail ────────────────────────────────── -->
-<div class="modal-overlay" id="ddExPickerModal">
-  <div class="modal-sheet" style="max-height:88vh;display:flex;flex-direction:column">
-    <div class="modal-handle"></div>
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-      <div class="modal-title" style="margin:0">Add Exercises</div>
-      <button onclick="closeDdExPicker()" style="background:var(--surface3);border:none;border-radius:8px;padding:6px 14px;color:var(--text);font-size:13px;font-weight:700;cursor:pointer">Done</button>
-    </div>
-    <input id="ddExSearch" placeholder="Search exercises..." oninput="renderDdExList()"
-      style="width:100%;box-sizing:border-box;background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;color:var(--text);font-size:14px;outline:none;font-family:inherit;margin-bottom:10px">
-    <div id="ddExMuscles" style="display:flex;gap:6px;flex-wrap:nowrap;overflow-x:auto;margin-bottom:10px;padding-bottom:2px;scrollbar-width:none"></div>
-    <div id="ddExList" style="flex:1;overflow-y:auto;min-height:0;border:1px solid var(--border);border-radius:var(--radius-sm)"></div>
+<!-- ── CUSTOM DAY EDITOR (exercise picker panel) ──────────────────────── -->
+<div id="cbDayEditor" style="display:none;flex-direction:column;min-height:100vh;background:var(--bg);padding:20px 16px 40px;box-sizing:border-box;max-width:480px;margin:0 auto">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+    <button onclick="closeCbDayEditor()" style="background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;padding:0;line-height:1">←</button>
+    <div id="cbDayEditorTitle" style="font-size:18px;font-weight:800;letter-spacing:.5px;color:var(--text)">DAY 1</div>
   </div>
+  <!-- Day type selector -->
+  <div style="font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--upper);text-transform:uppercase;margin-bottom:8px">Day Type</div>
+  <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px" id="cbDayTypeRow"></div>
+  <!-- Exercise search -->
+  <div style="font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--upper);text-transform:uppercase;margin-bottom:8px">Add Exercises</div>
+  <input id="cbExSearch" placeholder="Search exercises..." style="width:100%;box-sizing:border-box;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--text);font-size:14px;outline:none;margin-bottom:8px" oninput="filterCbExercises()">
+  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px" id="cbMuscleFilterRow"></div>
+  <div id="cbExList" style="display:flex;flex-direction:column;gap:6px;max-height:40vh;overflow-y:auto;margin-bottom:16px"></div>
+  <!-- Selected exercises for this day -->
+  <div style="font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--upper);text-transform:uppercase;margin-bottom:8px">Today's Exercises <span id="cbDayExCount" style="color:var(--muted);font-weight:400;text-transform:none"></span></div>
+  <div id="cbDayExSelected" style="display:flex;flex-direction:column;gap:6px;margin-bottom:20px"></div>
+  <button onclick="closeCbDayEditor()" style="background:var(--check);color:#000;border:none;border-radius:14px;padding:14px;font-size:15px;font-weight:800;cursor:pointer;width:100%">Done</button>
 </div>
 
-<!-- legacy alias so old code still works -->
-<div id="cbExPickerModal" style="display:none"></div>
-<div id="customBuilder"   style="display:none"></div>
-<div id="cbDayEditor"     style="display:none"></div>
-
-
-<!-- ── PROGRAM MANAGER ──────────────────────────────────────────────── -->
+<!-- ── PROGRAM MANAGER MODAL ─────────────────────────────────────────────── -->
 <div class="prog-modal-overlay" id="progModal" onclick="if(event.target===this)closeProgModal()">
   <div class="prog-modal-sheet">
     <div class="prog-modal-handle"></div>
-    <div class="prog-modal-title">My Programs</div>
+    <div class="prog-modal-title">MY PROGRAMS</div>
     <div class="prog-list" id="progList"></div>
     <button class="prog-add-btn" onclick="closeProgModal();showSetupScreen()">+ Create New Split</button>
   </div>
 </div>
 
-<!-- ── APP SHELL ────────────────────────────────────────────────────── -->
+<!-- ── APP SHELL ─────────────────────────────────────────────────────────── -->
 <div id="appShell">
   <div class="offline-banner" id="offlineBanner">⚠️ Offline mode — data saved locally only</div>
   <div class="top-bar">
@@ -1585,7 +543,7 @@ body.offline .offline-banner { display: block; }
       <div class="streak-chip" id="streakChip" style="display:none">🔥 <span id="streakCount">0</span></div>
       <div class="sync-dot" id="syncDot" title="Synced"></div>
       <button class="top-btn" id="progSwitchBtn" onclick="openProgModal()" style="max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">📋 Split</button>
-      <button class="top-btn" id="editModeBtn" style="display:none" onclick="toggleEditMode()">✏️ Edit</button>
+      <button class="top-btn" id="editModeBtn" onclick="toggleEditMode()">✏️ Edit</button>
       <button class="top-btn" id="topResetBtn" onclick="confirmReset()">Reset</button>
     </div>
   </div>
@@ -1607,7 +565,7 @@ body.offline .offline-banner { display: block; }
 
   <div id="pageHistory" class="page">
     <div class="history-filters">
-      <input class="history-search" id="historySearch" placeholder="Search exercises, days…" oninput="renderHistory()">
+      <input class="history-search" id="historySearch" placeholder="Search by exercise or day…" oninput="renderHistory()">
       <div style="display:flex;gap:6px;flex-wrap:wrap" id="historyFilterChips">
         <div class="filter-chip active" data-filter="all" onclick="setHistoryFilter('all')">All</div>
         <div class="filter-chip" data-filter="push" onclick="setHistoryFilter('push')">Push</div>
@@ -1625,9 +583,9 @@ body.offline .offline-banner { display: block; }
   </div>
 
   <div id="pageLibrary" class="page">
-    <div style="display:flex;background:var(--surface2);border-radius:var(--radius-sm);padding:3px;margin:12px 14px 0;gap:3px">
-      <button id="libTabMine" onclick="setLibTab('mine')" style="flex:1;padding:9px;border:none;border-radius:8px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;background:var(--surface3);color:var(--text);transition:all .2s">My Library</button>
-      <button id="libTabCommunity" onclick="setLibTab('community')" style="flex:1;padding:9px;border:none;border-radius:8px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;background:none;color:var(--muted);transition:all .2s">Community</button>
+    <div style="display:flex;background:var(--surface2);border-radius:10px;padding:3px;margin:12px 16px 0">
+      <button id="libTabMine" onclick="setLibTab('mine')" style="flex:1;padding:8px;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;background:var(--surface3);color:var(--text);transition:all .2s">My Library</button>
+      <button id="libTabCommunity" onclick="setLibTab('community')" style="flex:1;padding:8px;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;background:none;color:var(--muted);transition:all .2s">Community</button>
     </div>
     <div id="libPaneMine">
       <div class="library-search-wrap"><input class="library-search" id="libSearch" placeholder="Search exercises…" oninput="filterLibrary()"></div>
@@ -1638,7 +596,7 @@ body.offline .offline-banner { display: block; }
       <div class="library-search-wrap"><input class="library-search" id="communitySearch" placeholder="Search community exercises…" oninput="filterCommunity()"></div>
       <div class="muscle-tabs" id="communityMuscleTabs"></div>
       <div class="library-list" id="communityList"></div>
-      <div style="padding:0 14px 16px;text-align:center">
+      <div style="padding:0 16px 16px;text-align:center">
         <button class="prog-add-btn" onclick="openSubmitCommunityModal()">+ Submit Exercise to Community</button>
       </div>
     </div>
@@ -1653,20 +611,16 @@ body.offline .offline-banner { display: block; }
       </div>
       <div class="settings-label">Preferences</div>
       <div class="settings-row">
-        <div><div class="settings-row-label">Weight Unit</div><div class="settings-row-sub">Shown throughout the app</div></div>
+        <div><div class="settings-row-label">Weight Unit</div><div class="settings-row-sub">Used throughout the app</div></div>
         <div style="display:flex;background:var(--surface2);border-radius:20px;border:1px solid var(--border);overflow:hidden">
-          <button id="unitLbsBtn" onclick="setWeightUnit('lbs')" style="padding:7px 16px;border:none;border-radius:20px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;background:none;color:var(--muted);transition:all .2s">lbs</button>
-          <button id="unitKgBtn" onclick="setWeightUnit('kg')" style="padding:7px 16px;border:none;border-radius:20px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;background:none;color:var(--muted);transition:all .2s">kg</button>
+          <button id="unitLbsBtn" onclick="setWeightUnit('lbs')" style="padding:6px 14px;border:none;border-radius:20px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;background:none;color:var(--muted);transition:all .2s">lbs</button>
+          <button id="unitKgBtn" onclick="setWeightUnit('kg')" style="padding:6px 14px;border:none;border-radius:20px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;background:none;color:var(--muted);transition:all .2s">kg</button>
         </div>
       </div>
       <div class="settings-label">Program</div>
       <div class="settings-row">
         <div><div class="settings-row-label">Active Split</div><div class="settings-row-sub" id="settingsProgramName">Loading…</div></div>
         <button class="top-btn" onclick="openProgModal()">Switch</button>
-      </div>
-      <div class="settings-row" style="margin-top:8px">
-        <div><div class="settings-row-label">Queue Position</div><div class="settings-row-sub">Restart the rolling loop from Day 1</div></div>
-        <button class="top-btn" onclick="resetQueuePointer()">Reset</button>
       </div>
       <div class="settings-label">Data</div>
       <button class="danger-btn" onclick="clearLocalAndSync()">🗑 Clear Local Cache</button>
@@ -1688,16 +642,16 @@ body.offline .offline-banner { display: block; }
   </nav>
 </div>
 
-<!-- ── MODALS ────────────────────────────────────────────────────────── -->
+<!-- ── MODALS ─────────────────────────────────────────────────────────────── -->
 <div class="modal-overlay" id="editModal">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
-    <div class="modal-title" id="editModalTitle">Edit Exercise</div>
+    <div class="modal-title" id="editModalTitle">EDIT EXERCISE</div>
     <label class="modal-label">Exercise Name</label>
-    <input class="modal-input" id="editName" placeholder="Exercise name">
-    <label class="modal-label">Default Weight / Note</label>
-    <input class="modal-input" id="editWeight" placeholder="e.g. 135 lbs, bodyweight, light">
-    <button class="modal-btn green" onclick="saveEdit()">Save Changes</button>
+    <input class="modal-input" id="editName" placeholder="e.g. Bench Press">
+    <label class="modal-label">Default Weight × Reps</label>
+    <input class="modal-input" id="editWeight" placeholder="e.g. 135 × 8">
+    <button class="modal-btn primary" onclick="saveEdit()">Save Changes</button>
     <button class="modal-btn secondary" onclick="closeModal('editModal')">Cancel</button>
   </div>
 </div>
@@ -1705,12 +659,12 @@ body.offline .offline-banner { display: block; }
 <div class="modal-overlay" id="pickerModal">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
-    <div class="modal-title" id="pickerTitle">Add Exercise</div>
-    <div class="modal-sub" id="pickerContext"></div>
-    <input class="picker-search" id="pickerSearch" placeholder="Search exercises…" oninput="filterPicker()">
+    <div class="modal-title" id="pickerTitle">ADD EXERCISE</div>
+    <div class="modal-sub" id="pickerContext">Pick an exercise</div>
+    <input class="picker-search" id="pickerSearch" placeholder="Search…" oninput="filterPicker()">
     <div class="picker-muscle-tabs" id="pickerTabs"></div>
     <div class="picker-results" id="pickerResults"></div>
-    <input class="picker-weight-input" id="pickerWeight" placeholder="Default weight (optional)">
+    <input class="picker-weight-input" id="pickerWeight" placeholder="Starting weight × reps  e.g. 135 × 8">
     <button class="modal-btn green" id="pickerConfirmBtn" onclick="confirmPick()">Add to Workout</button>
     <button class="modal-btn secondary" onclick="closeModal('pickerModal')">Cancel</button>
   </div>
@@ -1719,9 +673,9 @@ body.offline .offline-banner { display: block; }
 <div class="modal-overlay" id="createModal">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
-    <div class="modal-title">Create Exercise</div>
-    <label class="modal-label">Exercise Name</label>
-    <input class="modal-input" id="createName" placeholder="e.g. Cable Lateral Raise">
+    <div class="modal-title">NEW EXERCISE</div>
+    <label class="modal-label">Name</label>
+    <input class="modal-input" id="createName" placeholder="e.g. Cable Rope Curl">
     <label class="modal-label">Primary Muscle</label>
     <select class="modal-select" id="createMuscle">
       <option value="chest">Chest</option><option value="back">Back</option>
@@ -1740,25 +694,27 @@ body.offline .offline-banner { display: block; }
     <select class="modal-select" id="createCat">
       <option value="compound">Compound</option><option value="isolation">Isolation</option>
     </select>
-    <button class="modal-btn green" onclick="saveCustomExercise()">Create Exercise</button>
+    <button class="modal-btn primary" onclick="saveCustomExercise()">Create Exercise</button>
     <button class="modal-btn secondary" onclick="closeModal('createModal')">Cancel</button>
   </div>
 </div>
 
-<div class="modal-overlay" id="commModal">
+<!-- ── COMMUNITY SUBMIT MODAL ────────────────────────────────────────────── -->
+<div class="modal-overlay" id="communitySubmitModal">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
-    <div class="modal-title">Submit to Community</div>
-    <div class="modal-sub">Share an exercise with the community for others to use.</div>
-    <label class="modal-label">Exercise Name</label>
-    <input class="modal-input" id="commName" placeholder="e.g. Bayesian Curl">
+    <div class="modal-title">SUBMIT TO COMMUNITY</div>
+    <div style="background:rgba(245,166,35,0.08);border:1px solid rgba(245,166,35,0.2);border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:13px;color:var(--gold)">Submitted exercises are reviewed before appearing to other users.</div>
+    <label class="modal-label">Name</label>
+    <input class="modal-input" id="commName" placeholder="e.g. Landmine Press">
     <label class="modal-label">Primary Muscle</label>
     <select class="modal-select" id="commMuscle">
       <option value="chest">Chest</option><option value="back">Back</option>
       <option value="shoulders">Shoulders</option><option value="biceps">Biceps</option>
       <option value="triceps">Triceps</option><option value="quads">Quads</option>
       <option value="hamstrings">Hamstrings</option><option value="glutes">Glutes</option>
-      <option value="calves">Calves</option><option value="abs">Abs</option><option value="forearms">Forearms</option>
+      <option value="calves">Calves</option><option value="abs">Abs</option>
+      <option value="forearms">Forearms</option>
     </select>
     <label class="modal-label">Equipment</label>
     <select class="modal-select" id="commEquip">
@@ -1770,24 +726,28 @@ body.offline .offline-banner { display: block; }
     <select class="modal-select" id="commCat">
       <option value="compound">Compound</option><option value="isolation">Isolation</option>
     </select>
-    <label class="modal-label">Description (optional, max 300 chars)</label>
-    <input class="modal-input" id="commDesc" placeholder="How to perform it…" maxlength="300">
-    <button class="modal-btn green" onclick="submitCommunityExercise()">Submit for Review</button>
-    <button class="modal-btn secondary" onclick="closeModal('commModal')">Cancel</button>
+    <label class="modal-label">Notes / Cue (optional)</label>
+    <input class="modal-input" id="commNotes" placeholder="e.g. Keep elbows tucked, full ROM" maxlength="300">
+    <button class="modal-btn primary" onclick="submitCommunityExercise()">Submit for Review</button>
+    <button class="modal-btn secondary" onclick="closeModal('communitySubmitModal')">Cancel</button>
   </div>
 </div>
 
+<!-- ── LOG EDITOR MODAL ──────────────────────────────────────────────────── -->
 <div class="modal-overlay" id="logEditorModal">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
-    <div class="modal-title" id="logEditorTitle">Edit Session</div>
+    <div class="modal-title" id="logEditorTitle">EDIT SESSION</div>
     <label class="modal-label">Date</label>
     <input class="modal-input" id="logEditorDate" type="date">
     <label class="modal-label">Day Type</label>
     <select class="modal-select" id="logEditorType">
-      <option value="push">Push</option><option value="pull">Pull</option>
-      <option value="legs">Legs</option><option value="upper">Upper</option>
-      <option value="lower">Lower</option><option value="rest">Rest / Other</option>
+      <option value="push">Push</option>
+      <option value="pull">Pull</option>
+      <option value="legs">Legs</option>
+      <option value="upper">Upper</option>
+      <option value="lower">Lower</option>
+      <option value="rest">Rest / Other</option>
     </select>
     <label class="modal-label" style="margin-top:12px">Exercises</label>
     <div id="logEditorExList"></div>
@@ -1797,21 +757,21 @@ body.offline .offline-banner { display: block; }
   </div>
 </div>
 
+<!-- ── GROUP SETTINGS MODAL ────────────────────────────────────────────── -->
 <div class="modal-overlay" id="groupSettingsModal">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
-    <div class="modal-title">Group Settings</div>
+    <div class="modal-title">GROUP SETTINGS</div>
     <label class="modal-label">Group Name</label>
     <input class="modal-input" id="gsGroupName" placeholder="e.g. Chest Press">
-    <label class="modal-label" id="gsPickLabel">How many to choose</label>
+    <label class="modal-label" id="gsPickLabel">How many to pick</label>
     <div class="pick-count-row" id="gsPickCountRow"></div>
     <div id="gsMultiNote" style="font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.5"></div>
-    <button class="modal-btn green" onclick="saveGroupSettings()">Save</button>
+    <button class="modal-btn primary" onclick="saveGroupSettings()">Save</button>
     <button class="modal-btn secondary" onclick="closeModal('groupSettingsModal')">Cancel</button>
   </div>
 </div>
 
-<!-- ── REST TIMER SHEET ─────────────────────────────────────────────── -->
 <div class="rest-timer-sheet" id="restTimerSheet">
   <div class="rest-timer-handle"></div>
   <div class="rest-timer-label">Rest Timer</div>
@@ -1828,9 +788,10 @@ body.offline .offline-banner { display: block; }
   </div>
 </div>
 
-<!-- ── TOAST & CONFIRM ─────────────────────────────────────────────── -->
+<!-- ── TOAST ──────────────────────────────────────────────────────────────── -->
 <div class="toast" id="toast"></div>
 
+<!-- ── CONFIRM MODAL ──────────────────────────────────────────────────────── -->
 <div class="confirm-overlay" id="confirmOverlay">
   <div class="confirm-card">
     <div class="confirm-title" id="confirmTitle">Are you sure?</div>
@@ -1950,12 +911,6 @@ function goOffline() {
   bootOffline();
 }
 
-function goGuest() {
-  offlineMode = true;
-  currentUser = { username: 'Guest', email: '' };
-  bootOffline();
-}
-
 // ── TEMPLATES ─────────────────────────────────────────────────────────────────
 const TEMPLATES = {
   ppl6: {
@@ -2004,7 +959,7 @@ const TEMPLATES = {
         {name:'Rear Delts',type:'choices',rule:'Pick 1',blocks:[
           {label:'Rear Delt — pick 1',opts:[{name:'Rear Delt Machine',weight:'',dbId:'e_rear_delt_machine'},{name:'Reverse Fly',weight:'',dbId:'e_reverse_fly'}]}
         ]},
-        {name:'Traps',type:'fixed',exs:[{name:'Barbell Shrug',weight:'',dbId:'e_barbell_shrug'},{name:'Dumbbell Shrug',weight:'',dbId:'e_db_shrug'}]},{name:'Biceps',type:'fixed',exs:[{name:'Cable Curl',weight:'',dbId:'e_cable_curl'},{name:'Bayesian Cable Curl',weight:'',dbId:'e_bayesian_curl'},{name:'Preacher Curl',weight:'',dbId:'e_preacher_curl'}]}
+        {name:'Biceps',type:'fixed',exs:[{name:'Nautilus Curl',weight:'',dbId:'e_nautilus_curl'},{name:'Bayesian Cable Curl',weight:'',dbId:'e_bayesian_curl'},{name:'Preacher Curl',weight:'',dbId:'e_preacher_curl'}]}
       ]},
       {label:'SAT',type:'legs',typeName:'Legs B',title:'LEGS B',groups:[
         {name:'Warm-Up',type:'fixed',exs:[{name:'Adduction Machine',weight:'light',dbId:'e_adduction_machine'}]},
@@ -2130,343 +1085,298 @@ const TEMPLATES = {
 let selectedTemplate = 'ppl6';
 let allPrograms = [];
 
-// ── BUILDER STATE ─────────────────────────────────────────────────────────────
-let builderDays = [];       // [{label, type, typeName, title, groups:[{name,type,exs:[]}]}]
-let builderEditingProg = null; // null = new program, id = editing existing
-let ddEditingDay = null;    // index into builderDays
-let ddExMuscleFilter = 'all';
+function selectTemplate(tpl) {
+  selectedTemplate = tpl;
+  document.querySelectorAll('.template-card').forEach(c => c.classList.toggle('selected', c.dataset.tpl === tpl));
+  const tplData = TEMPLATES[tpl];
+  const nameInput = document.getElementById('setupProgramName');
+  if (!nameInput.value || Object.values(TEMPLATES).some(t => t.name === nameInput.value)) {
+    nameInput.value = tplData.name;
+  }
+  if (tpl === 'custom') {
+    setTimeout(openCustomBuilder, 80);
+  }
+}
 
-const BUILDER_TYPES = [
-  {key:'push',label:'Push',emoji:'💪'},{key:'pull',label:'Pull',emoji:'🔄'},
-  {key:'legs',label:'Legs',emoji:'🦵'},{key:'upper',label:'Upper',emoji:'⬆'},
-  {key:'lower',label:'Lower',emoji:'⬇'},{key:'fullbody',label:'Full Body',emoji:'🌐'},
-  {key:'chest',label:'Chest',emoji:'🎯'},{key:'back',label:'Back',emoji:'🔰'},
-  {key:'shoulders',label:'Shoulders',emoji:'🔺'},{key:'arms',label:'Arms',emoji:'🤜'},
-  {key:'cardio',label:'Cardio',emoji:'⚡'},{key:'rest',label:'Rest',emoji:'😴'},
+// ── CUSTOM SPLIT BUILDER ─────────────────────────────────────────────────────
+const CB_DAYS = ['MON','TUE','WED','THU','FRI','SAT','SUN'];
+const CB_TYPES = [
+  {key:'push',label:'Push',emoji:'💪'},
+  {key:'pull',label:'Pull',emoji:'🔙'},
+  {key:'legs',label:'Legs',emoji:'🦵'},
+  {key:'upper',label:'Upper',emoji:'⬆️'},
+  {key:'lower',label:'Lower',emoji:'⬇️'},
+  {key:'fullbody',label:'Full Body',emoji:'🌐'},
+  {key:'rest',label:'Rest',emoji:'😴'},
 ];
-const BUILDER_MUSCLES = ['all','chest','back','shoulders','biceps','triceps','traps','quads','hamstrings','glutes','calves','abs'];
 
-// ── SHOW / HIDE BUILDER ───────────────────────────────────────────────────────
-function showSetupScreen(editProg) {
-  document.getElementById('authScreen').style.display = 'none';
-  document.getElementById('appShell').style.display = 'none';
-  document.getElementById('dayDetailPanel').style.display = 'none';
+let cbTrainingDays = 4;       // how many training days
+let cbDayData = [];           // [{label,type,typeName,title,exercises:[{id,name,muscle,equipment}]}]
+let cbEditingDay = null;      // index into cbDayData being edited
+let cbExMuscleFilter = 'all';
+let cbSavedBuilderDays = null; // for returning from day editor
 
-  builderEditingProg = editProg || null;
-  if (editProg) {
-    // Editing existing program
-    builderDays = JSON.parse(JSON.stringify(editProg.days));
-    document.getElementById('builderName').value = editProg.name || '';
-    document.getElementById('builderHeaderTitle').textContent = 'EDIT SPLIT';
-  } else {
-    // New program
-    builderDays = [];
-    document.getElementById('builderName').value = '';
-    document.getElementById('builderHeaderTitle').textContent = 'NEW SPLIT';
-  }
-  renderBuilderDayList();
-  document.getElementById('programSetup').style.display = 'flex';
-}
-
-function builderBack() {
+function openCustomBuilder() {
   document.getElementById('programSetup').style.display = 'none';
-  if (activeProgram) {
-    document.getElementById('appShell').style.display = 'block';
-  } else {
-    // No program yet — show auth or keep hidden
-    document.getElementById('authScreen').style.display = 'flex';
-  }
+  document.getElementById('customBuilder').style.display = 'flex';
+  if (cbDayData.length === 0) initCbDays(cbTrainingDays);
+  renderCbDayCount();
+  renderCbSchedule();
+  document.getElementById('cbName').value = document.getElementById('setupProgramName').value || 'My Custom Split';
 }
 
-// ── TEMPLATE QUICK-FILL ───────────────────────────────────────────────────────
-function applyTemplate(key) {
-  const tpl = TEMPLATES[key];
-  if (!tpl) return;
-  // Deep copy days and normalize to builderDays format
-  builderDays = JSON.parse(JSON.stringify(tpl.days)).map(function(day, i) {
-    return {
-      label: day.label || ('Day '+(i+1)),
-      type: day.type || 'push',
-      typeName: day.typeName || day.type,
-      title: day.title || (day.typeName||day.type||'Day').toUpperCase(),
-      groups: day.groups || []
-    };
+function closeCustomBuilder() {
+  document.getElementById('customBuilder').style.display = 'none';
+  document.getElementById('programSetup').style.display = 'flex';
+  // deselect custom card
+  document.querySelectorAll('.template-card').forEach(c => c.classList.remove('selected'));
+  selectedTemplate = 'ppl6';
+  document.querySelectorAll('.template-card').forEach(c => c.classList.toggle('selected', c.dataset.tpl === 'ppl6'));
+}
+
+function initCbDays(n) {
+  const dayLabels = CB_DAYS.slice(0, 7);
+  const types = ['push','pull','legs','rest','push','pull','rest'];
+  cbDayData = dayLabels.map((label, i) => {
+    const isTraining = i < n;
+    const tp = isTraining ? (types[i % types.length]) : 'rest';
+    const tpInfo = CB_TYPES.find(t => t.key === tp);
+    return {label, type: tp, typeName: tpInfo ? tpInfo.label : 'Rest', title: (tpInfo ? tpInfo.label : 'Rest').toUpperCase(), exercises: []};
   });
-  if (!document.getElementById('builderName').value) {
-    document.getElementById('builderName').value = tpl.name;
-  }
-  renderBuilderDayList();
-  showToast('Template loaded — exercises pre-filled. Hit Save or customize.');
 }
 
-// ── DAY LIST ──────────────────────────────────────────────────────────────────
-function builderAddDay() {
-  const n = builderDays.length + 1;
-  builderDays.push({ label: 'Day ' + n, type: 'push', typeName: 'Push', title: 'DAY ' + n, groups: [] });
-  renderBuilderDayList();
+function setCbDayCount(n) {
+  cbTrainingDays = n;
+  initCbDays(n);
+  renderCbDayCount();
+  renderCbSchedule();
 }
 
-function builderRemoveDay(i) {
-  builderDays.splice(i, 1);
-  renderBuilderDayList();
+function renderCbDayCount() {
+  const row = document.getElementById('cbDayCountRow');
+  row.innerHTML = [2,3,4,5,6].map(n => `
+    <button onclick="setCbDayCount(${n})" style="flex:1;padding:10px 0;border-radius:10px;border:2px solid ${n===cbTrainingDays?'var(--check)':'var(--border)'};background:${n===cbTrainingDays?'rgba(78,203,127,.1)':'var(--surface2)'};color:${n===cbTrainingDays?'var(--check)':'var(--text)'};font-weight:700;font-size:15px;cursor:pointer">${n}</button>
+  `).join('');
 }
 
-function renderBuilderDayList() {
-  const el = document.getElementById('builderDayList');
-  if (!builderDays.length) {
-    el.innerHTML = '<div style="text-align:center;padding:28px;border:1.5px dashed var(--border);border-radius:12px;color:var(--muted);font-size:13px">No days yet — add one or load a template</div>';
-    return;
-  }
-  el.innerHTML = builderDays.map(function(day, i) {
-    const tp = BUILDER_TYPES.find(t => t.key === day.type) || BUILDER_TYPES[BUILDER_TYPES.length-1];
+let cbDragSrc = null;
+function renderCbSchedule() {
+  const el = document.getElementById('cbSchedule');
+  el.innerHTML = cbDayData.map((day, i) => {
+    const tpInfo = CB_TYPES.find(t => t.key === day.type) || CB_TYPES[CB_TYPES.length-1];
+    const exCount = (day.exercises||[]).length;
     const isRest = day.type === 'rest';
-    const exCount = (day.groups||[]).reduce((s,g) => s + (g.exs||[]).length, 0);
-    const sub = isRest ? 'Rest / recovery'
-      : exCount > 0 ? exCount + ' exercise' + (exCount!==1?'s':'')
-      : 'Tap to add exercises';
-    return `<div style="display:flex;align-items:center;gap:10px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:12px 14px">
-      <div style="width:36px;height:36px;border-radius:8px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">${tp.emoji}</div>
-      <div style="flex:1;min-width:0;cursor:pointer" onclick="openDayDetail(${i})">
-        <div style="font-weight:700;font-size:14px;color:var(--text)">${day.title || day.label}</div>
-        <div style="font-size:12px;color:var(--muted)">${sub}</div>
-      </div>
-      <button onclick="openDayDetail(${i})" style="background:var(--surface3);border:none;border-radius:8px;padding:6px 12px;color:var(--text);font-size:12px;font-weight:600;cursor:pointer">Edit</button>
-      <button onclick="builderRemoveDay(${i})" style="background:none;border:none;color:var(--danger);font-size:18px;cursor:pointer;padding:2px 6px;line-height:1">✕</button>
-    </div>`;
-  }).join('');
-}
-
-// ── SAVE ──────────────────────────────────────────────────────────────────────
-async function builderSave() {
-  const name = (document.getElementById('builderName').value || '').trim() || 'My Split';
-  if (!builderDays.length) { showToast('Add at least one day first'); return; }
-
-  const btn = document.getElementById('builderSaveBtn');
-  btn.disabled = true; btn.textContent = 'Saving...';
-
-  // Pass days through directly — groups already in correct program format
-  const days = builderDays.map(function(day, i) {
-    return {
-      label: day.label || ('Day ' + (i+1)),
-      type: day.type || 'push',
-      typeName: day.typeName || day.type || 'push',
-      title: day.title || (day.typeName||day.type||'Day').toUpperCase(),
-      groups: day.groups || []
-    };
-  });
-
-  try {
-    let prog;
-    if (builderEditingProg) {
-      prog = await api('PUT', '/programs/' + builderEditingProg.id, { name, days, template_key: 'custom' });
-      const idx = allPrograms.findIndex(p => p.id === builderEditingProg.id);
-      if (idx >= 0) allPrograms[idx] = prog;
-    } else {
-      prog = await api('POST', '/programs', { name, days, template_key: 'custom' });
-      allPrograms.unshift(prog);
-    }
-    activeProgram = prog; DAYS = prog.days;
-    document.getElementById('programSetup').style.display = 'none';
-    document.getElementById('appShell').style.display = 'block';
-    document.body.classList.add('has-app');
-    if (document.getElementById('settingsProgramName')) {
-      document.getElementById('settingsProgramName').textContent = prog.name;
-    }
-    updateProgSwitchBtn();
-    activeDay = getNextUpIndexInclRest();
-    openGroups = {};
-    render(); renderSettings();
-    showToast('✅ Split saved!');
-    builderDays = []; builderEditingProg = null;
-    btn.disabled = false; btn.textContent = 'Save';
-  } catch(e) {
-    showToast('❌ Could not save: ' + (e.message||'unknown error'));
-    btn.disabled = false; btn.textContent = 'Save';
-  }
-}
-
-// ── DAY DETAIL PANEL ──────────────────────────────────────────────────────────
-function openDayDetail(i) {
-  ddEditingDay = i;
-  const day = builderDays[i];
-  document.getElementById('dayDetailTitle').textContent = (day.title || day.label || ('Day '+(i+1)));
-  document.getElementById('dayDetailName').value = day.title || day.typeName || '';
-  renderDdTypeRow();
-  renderDdExList_panel();
-  document.getElementById('programSetup').style.display = 'none';
-  document.getElementById('dayDetailPanel').style.display = 'flex';
-}
-
-function closeDayDetail() {
-  document.getElementById('dayDetailPanel').style.display = 'none';
-  document.getElementById('programSetup').style.display = 'flex';
-  renderBuilderDayList();
-}
-
-function ddUpdateName() {
-  if (ddEditingDay === null) return;
-  const val = document.getElementById('dayDetailName').value.trim();
-  builderDays[ddEditingDay].title = val ? val.toUpperCase() : (builderDays[ddEditingDay].typeName||'DAY').toUpperCase();
-  document.getElementById('dayDetailTitle').textContent = builderDays[ddEditingDay].title;
-}
-
-function renderDdTypeRow() {
-  const day = builderDays[ddEditingDay];
-  const row = document.getElementById('dayDetailTypeRow');
-  row.innerHTML = BUILDER_TYPES.map(tp => {
-    const sel = day.type === tp.key;
-    return `<button onclick="ddSetType('${tp.key}')" style="padding:6px 11px;border-radius:20px;border:1.5px solid ${sel?'var(--text)':'var(--border)'};background:${sel?'rgba(255,255,255,0.1)':'var(--surface2)'};color:${sel?'var(--text)':'var(--muted)'};font-size:12px;font-weight:600;cursor:pointer">${tp.emoji} ${tp.label}</button>`;
-  }).join('');
-}
-
-function ddSetType(key) {
-  const tp = BUILDER_TYPES.find(t => t.key === key);
-  builderDays[ddEditingDay].type = key;
-  builderDays[ddEditingDay].typeName = tp.label;
-  if (!document.getElementById('dayDetailName').value.trim()) {
-    builderDays[ddEditingDay].title = tp.label.toUpperCase();
-    document.getElementById('dayDetailTitle').textContent = tp.label.toUpperCase();
-  }
-  renderDdTypeRow();
-}
-
-function renderDdExList_panel() {
-  const day = builderDays[ddEditingDay];
-  const allExs = (day.groups||[]).flatMap(g => g.exs||[]);
-  const el = document.getElementById('dayDetailExList');
-  const empty = document.getElementById('dayDetailEmpty');
-  if (!allExs.length) {
-    el.innerHTML = '';
-    empty.style.display = 'block';
-    return;
-  }
-  empty.style.display = 'none';
-  el.innerHTML = allExs.map((ex, ei) => {
-    // Find which group this ex belongs to
-    let gi = -1, localEi = -1;
-    (day.groups||[]).forEach((g, gIdx) => {
-      const idx = (g.exs||[]).findIndex(e => e === ex);
-      if (idx >= 0) { gi = gIdx; localEi = idx; }
-    });
-    return `<div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:10px">
+    return `
+    <div class="cb-day-card" draggable="true"
+      ondragstart="cbDragSrc=${i};event.dataTransfer.effectAllowed='move'"
+      ondragover="event.preventDefault();event.dataTransfer.dropEffect='move'"
+      ondrop="event.preventDefault();cbDropDay(${i})"
+      style="display:flex;align-items:center;gap:10px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:12px 14px;cursor:grab;touch-action:none">
+      <span style="font-size:18px;opacity:.5">⠿</span>
+      <div style="width:36px;height:36px;border-radius:8px;background:${isRest?'var(--surface3)':'rgba(78,203,127,.12)'};display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">${tpInfo.emoji}</div>
       <div style="flex:1;min-width:0">
-        <div style="font-size:14px;font-weight:600;color:var(--text)">${ex.name}</div>
-        <div style="font-size:11px;color:var(--muted)">${ex.muscle||ex.primary_muscle||''} · ${ex.equipment||''}</div>
+        <div style="font-weight:700;font-size:14px;color:var(--text)">${day.label} — ${tpInfo.label}</div>
+        <div style="font-size:12px;color:var(--muted)">${isRest ? 'Rest / recovery' : exCount > 0 ? `${exCount} exercise${exCount!==1?'s':''}` : 'Tap to add exercises'}</div>
       </div>
-      <input placeholder="weight/sets" value="${(ex.weight||'').replace(/"/g,'&quot;')}"
-        onchange="ddUpdateExWeight(${gi},${localEi},this.value)"
-        style="width:90px;background:var(--surface3);border:1px solid var(--border);border-radius:6px;padding:5px 8px;color:var(--text);font-size:12px;font-family:inherit;outline:none">
-      <button onclick="ddRemoveEx(${gi},${localEi})" style="background:none;border:none;color:var(--danger);font-size:18px;cursor:pointer;padding:2px 4px;line-height:1;flex-shrink:0">✕</button>
+      <button onclick="openCbDayEditor(${i})" style="background:var(--surface3);border:none;border-radius:8px;padding:7px 12px;color:var(--text);font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0">${isRest?'Change':'Edit'}</button>
     </div>`;
   }).join('');
 }
 
-function ddUpdateExWeight(gi, ei, val) {
-  if (ddEditingDay === null) return;
-  const day = builderDays[ddEditingDay];
-  if (day.groups[gi] && day.groups[gi].exs[ei]) {
-    day.groups[gi].exs[ei].weight = val;
-  }
+function cbDropDay(targetIdx) {
+  if (cbDragSrc === null || cbDragSrc === targetIdx) { cbDragSrc = null; return; }
+  const moved = cbDayData.splice(cbDragSrc, 1)[0];
+  cbDayData.splice(targetIdx, 0, moved);
+  cbDragSrc = null;
+  renderCbSchedule();
 }
 
-function ddRemoveEx(gi, ei) {
-  if (ddEditingDay === null) return;
-  builderDays[ddEditingDay].groups[gi].exs.splice(ei, 1);
-  // Remove group if empty
-  if (!builderDays[ddEditingDay].groups[gi].exs.length) {
-    builderDays[ddEditingDay].groups.splice(gi, 1);
-  }
-  renderDdExList_panel();
+function openCbDayEditor(dayIdx) {
+  cbEditingDay = dayIdx;
+  cbExMuscleFilter = 'all';
+  const day = cbDayData[dayIdx];
+  document.getElementById('cbDayEditorTitle').textContent = `${day.label} — ${day.typeName || day.type.toUpperCase()}`;
+  document.getElementById('customBuilder').style.display = 'none';
+  document.getElementById('cbDayEditor').style.display = 'flex';
+  document.getElementById('cbExSearch').value = '';
+  renderCbDayTypes(dayIdx);
+  renderCbMuscleFilters();
+  filterCbExercises();
+  renderCbDaySelected();
 }
 
-// ── EXERCISE PICKER (for day detail) ─────────────────────────────────────────
-function openDdExPicker() {
-  ddExMuscleFilter = 'all';
-  document.getElementById('ddExSearch').value = '';
-  renderDdExMuscles();
-  renderDdExList();
-  document.getElementById('ddExPickerModal').classList.add('open');
+function closeCbDayEditor() {
+  document.getElementById('cbDayEditor').style.display = 'none';
+  document.getElementById('customBuilder').style.display = 'flex';
+  renderCbSchedule();
 }
 
-function closeDdExPicker() {
-  document.getElementById('ddExPickerModal').classList.remove('open');
-  renderDdExList_panel();
-}
-
-function renderDdExMuscles() {
-  const el = document.getElementById('ddExMuscles');
-  el.innerHTML = BUILDER_MUSCLES.map(m => {
-    const sel = ddExMuscleFilter === m;
-    return `<button onclick="ddSetExMuscle('${m}')" style="padding:5px 10px;border-radius:16px;border:1.5px solid ${sel?'var(--text)':'var(--border)'};background:${sel?'rgba(255,255,255,0.08)':'var(--surface2)'};color:${sel?'var(--text)':'var(--muted)'};font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;text-transform:capitalize;flex-shrink:0">${m==='all'?'All':m}</button>`;
+function renderCbDayTypes(dayIdx) {
+  const day = cbDayData[dayIdx];
+  const row = document.getElementById('cbDayTypeRow');
+  row.innerHTML = CB_TYPES.map(tp => {
+    const sel = day.type === tp.key;
+    return `<button onclick="setCbDayType(${dayIdx},'${tp.key}')" style="padding:7px 12px;border-radius:20px;border:2px solid ${sel?'var(--check)':'var(--border)'};background:${sel?'rgba(78,203,127,.1)':'var(--surface2)'};color:${sel?'var(--check)':'var(--muted)'};font-size:12px;font-weight:600;cursor:pointer">${tp.emoji} ${tp.label}</button>`;
   }).join('');
 }
 
-function ddSetExMuscle(m) { ddExMuscleFilter = m; renderDdExMuscles(); renderDdExList(); }
+function setCbDayType(dayIdx, typeKey) {
+  const tpInfo = CB_TYPES.find(t => t.key === typeKey);
+  cbDayData[dayIdx].type = typeKey;
+  cbDayData[dayIdx].typeName = tpInfo.label;
+  cbDayData[dayIdx].title = tpInfo.label.toUpperCase();
+  document.getElementById('cbDayEditorTitle').textContent = `${cbDayData[dayIdx].label} — ${tpInfo.label}`;
+  renderCbDayTypes(dayIdx);
+  filterCbExercises();
+}
 
-function renderDdExList() {
-  const query = (document.getElementById('ddExSearch').value || '').toLowerCase();
-  const day = builderDays[ddEditingDay] || { groups: [] };
-  const addedIds = new Set((day.groups||[]).flatMap(g => (g.exs||[]).map(e => e.id)));
+const CB_MUSCLES = ['all','chest','back','shoulders','biceps','triceps','quads','hamstrings','glutes','calves','abs'];
+function renderCbMuscleFilters() {
+  const row = document.getElementById('cbMuscleFilterRow');
+  row.innerHTML = CB_MUSCLES.map(m => {
+    const sel = cbExMuscleFilter === m;
+    return `<button onclick="setCbMuscle('${m}')" style="padding:5px 10px;border-radius:16px;border:1.5px solid ${sel?'var(--check)':'var(--border)'};background:${sel?'rgba(78,203,127,.1)':'var(--surface2)'};color:${sel?'var(--check)':'var(--muted)'};font-size:11px;font-weight:600;cursor:pointer;text-transform:capitalize">${m==='all'?'All':m}</button>`;
+  }).join('');
+}
 
-  const list = allExercises.filter(ex => {
-    if (ddExMuscleFilter !== 'all' && ex.primary_muscle !== ddExMuscleFilter) return false;
-    if (query && !ex.name.toLowerCase().includes(query)) return false;
+function setCbMuscle(m) { cbExMuscleFilter = m; renderCbMuscleFilters(); filterCbExercises(); }
+
+function filterCbExercises() {
+  const query = (document.getElementById('cbExSearch')?.value || '').toLowerCase();
+  const day = cbDayData[cbEditingDay];
+  const selectedIds = new Set((day.exercises||[]).map(e=>e.id));
+  let list = allExercises.filter(ex => {
+    if (cbExMuscleFilter !== 'all' && ex.primary_muscle !== cbExMuscleFilter) return false;
+    if (query && !ex.name.toLowerCase().includes(query) && !ex.primary_muscle.toLowerCase().includes(query)) return false;
     return true;
   });
-
-  const el = document.getElementById('ddExList');
-  if (!list.length) { el.innerHTML = '<div style="color:var(--muted);padding:16px;text-align:center">No exercises found</div>'; return; }
-
+  const el = document.getElementById('cbExList');
+  if (!list.length) { el.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:8px">No exercises found</div>'; return; }
   el.innerHTML = list.map(ex => {
-    const added = addedIds.has(ex.id);
-    return `<div onclick="ddToggleEx('${ex.id}')" style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border);cursor:pointer;background:${added?'rgba(255,255,255,0.04)':'transparent'}">
-      <div style="width:20px;height:20px;border-radius:50%;border:1.5px solid ${added?'var(--text)':'var(--border)'};background:${added?'var(--text)':'transparent'};flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;color:#000;font-weight:900">${added?'✓':''}</div>
+    const added = selectedIds.has(ex.id);
+    return `<div onclick="cbToggleExercise('${ex.id}')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:${added?'rgba(78,203,127,.08)':'var(--surface2)'};border:1.5px solid ${added?'var(--check)':'var(--border)'};border-radius:10px;cursor:pointer">
+      <div style="width:20px;height:20px;border-radius:50%;border:2px solid ${added?'var(--check)':'var(--border)'};background:${added?'var(--check)':'transparent'};flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;color:#000">${added?'✓':''}</div>
       <div style="flex:1;min-width:0">
-        <div style="font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${ex.name}</div>
+        <div style="font-size:13px;font-weight:600;color:var(--text)">${ex.name}</div>
         <div style="font-size:11px;color:var(--muted)">${ex.primary_muscle} · ${ex.equipment}</div>
       </div>
     </div>`;
   }).join('');
 }
 
-function ddToggleEx(exId) {
-  if (ddEditingDay === null) return;
-  const ex = allExercises.find(e => e.id === exId);
-  if (!ex) return;
-  const day = builderDays[ddEditingDay];
-  if (!day.groups) day.groups = [];
-
-  // Find if already added
-  let found = false;
-  for (let gi = 0; gi < day.groups.length; gi++) {
-    const idx = (day.groups[gi].exs||[]).findIndex(e => e.id === exId);
-    if (idx >= 0) {
-      day.groups[gi].exs.splice(idx, 1);
-      if (!day.groups[gi].exs.length) day.groups.splice(gi, 1);
-      found = true; break;
-    }
+function cbToggleExercise(exId) {
+  const day = cbDayData[cbEditingDay];
+  const idx = (day.exercises||[]).findIndex(e=>e.id===exId);
+  if (idx>=0) { day.exercises.splice(idx,1); }
+  else {
+    const ex = allExercises.find(e=>e.id===exId);
+    if (ex) day.exercises.push({id:ex.id,name:ex.name,muscle:ex.primary_muscle,equipment:ex.equipment});
   }
-  if (!found) {
-    // Add to default group (first fixed group, or create one)
-    let defaultGroup = day.groups.find(g => g.type === 'fixed');
-    if (!defaultGroup) {
-      defaultGroup = { name: 'Exercises', type: 'fixed', exs: [] };
-      day.groups.push(defaultGroup);
-    }
-    defaultGroup.exs.push({ id: ex.id, name: ex.name, muscle: ex.primary_muscle, equipment: ex.equipment, weight: '' });
-  }
-  renderDdExList();
+  filterCbExercises();
+  renderCbDaySelected();
 }
 
-// Stub aliases for old code that may still call these
-function openCustomBuilder() { showSetupScreen(null); }
-function closeCustomBuilder() { builderBack(); }
-function openCbDayEditor(i) { openDayDetail(i); }
-function closeCbDayEditor() { closeDayDetail(); }
-function saveCustomSplit() { builderSave(); }
-function createProgramFromSetup() { builderSave(); }
+function renderCbDaySelected() {
+  const day = cbDayData[cbEditingDay];
+  const exs = day.exercises || [];
+  document.getElementById('cbDayExCount').textContent = exs.length ? `(${exs.length})` : '';
+  const el = document.getElementById('cbDayExSelected');
+  if (!exs.length) { el.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:8px">No exercises added yet</div>'; return; }
+  el.innerHTML = exs.map((ex,i) => `
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:10px">
+      <span style="color:var(--muted);font-size:12px;width:18px">${i+1}</span>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:600;color:var(--text)">${ex.name}</div>
+        <div style="font-size:11px;color:var(--muted)">${ex.muscle} · ${ex.equipment}</div>
+      </div>
+      <button onclick="cbRemoveExercise(${i})" style="background:none;border:none;color:var(--danger);font-size:16px;cursor:pointer;padding:4px">✕</button>
+    </div>`).join('');
+}
 
+function cbRemoveExercise(idx) {
+  cbDayData[cbEditingDay].exercises.splice(idx,1);
+  filterCbExercises();
+  renderCbDaySelected();
+}
 
+async function saveCustomSplit() {
+  const name = document.getElementById('cbName').value.trim() || 'My Custom Split';
+  // Convert cbDayData into the program days format
+  const days = cbDayData.map(day => {
+    const groups = [];
+    if (day.type !== 'rest' && day.exercises && day.exercises.length > 0) {
+      // Group by muscle
+      const byMuscle = {};
+      day.exercises.forEach(ex => {
+        const m = ex.muscle || 'other';
+        if (!byMuscle[m]) byMuscle[m] = [];
+        byMuscle[m].push(ex);
+      });
+      Object.entries(byMuscle).forEach(([muscle, exs]) => {
+        groups.push({
+          name: muscle.charAt(0).toUpperCase() + muscle.slice(1),
+          type: 'fixed',
+          exs: exs.map(ex => ({name: ex.name, weight: '', dbId: ex.id}))
+        });
+      });
+    }
+    return { label: day.label, type: day.type, typeName: day.typeName || day.type, title: day.title || day.type.toUpperCase(), groups };
+  });
+  const btn = document.getElementById('cbSaveBtn');
+  btn.disabled = true; btn.textContent = 'Saving…';
+  try {
+    const prog = await api('POST', '/programs', { name, days, template_key: 'custom' });
+    activeProgram = prog;
+    allPrograms.unshift(prog);
+    DAYS = prog.days;
+    document.getElementById('customBuilder').style.display = 'none';
+    document.getElementById('appShell').style.display = 'block';
+    document.body.classList.add('has-app');
+    document.getElementById('settingsProgramName').textContent = prog.name;
+    updateProgSwitchBtn();
+    activeDay = getTodayIndex();
+    render();
+    renderSettings();
+    cbDayData = []; cbTrainingDays = 4; // reset for next time
+  } catch(e) {
+    showToast('Error saving split');
+    btn.disabled = false; btn.textContent = 'Save Split →';
+  }
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
+function showSetupScreen() {
+  document.getElementById('authScreen').style.display = 'none';
+  document.getElementById('appShell').style.display = 'none';
+  document.getElementById('programSetup').style.display = 'flex';
+  selectTemplate('ppl6');
+}
+
+async function createProgramFromSetup() {
+  const name = document.getElementById('setupProgramName').value.trim() || TEMPLATES[selectedTemplate].name;
+  const tplData = TEMPLATES[selectedTemplate];
+  // Deep clone days so template isn't mutated
+  const days = JSON.parse(JSON.stringify(tplData.days));
+  const btn = document.getElementById('setupStartBtn');
+  btn.disabled = true; btn.textContent = 'Creating…';
+  try {
+    const prog = await api('POST', '/programs', { name, days, template_key: selectedTemplate });
+    activeProgram = prog;
+    allPrograms.unshift(prog);
+    DAYS = prog.days;
+    document.getElementById('programSetup').style.display = 'none';
+    document.getElementById('appShell').style.display = 'block';
+    document.body.classList.add('has-app');
+    document.getElementById('settingsProgramName').textContent = prog.name;
+    updateProgSwitchBtn();
+    activeDay = getTodayIndex();
+    render();
+    renderSettings();
+  } catch(e) {
+    showToast('❌ ' + e.message);
+  }
+  btn.disabled = false; btn.textContent = 'Start Training →';
+}
 
 function updateProgSwitchBtn() {
   const btn = document.getElementById('progSwitchBtn');
@@ -2503,7 +1413,7 @@ async function switchProgram(id) {
   closeProgModal();
   updateProgSwitchBtn();
   document.getElementById('settingsProgramName').textContent = prog.name;
-  activeDay = getNextUpIndexInclRest();
+  activeDay = getTodayIndex();
   render();
 }
 
@@ -2567,13 +1477,6 @@ async function bootApp() {
         localStorage.setItem('weight_unit', weightUnit);
       }
     } catch(e) {} // non-fatal
-    // Queue progress
-    try {
-      const prog = await api('GET', '/progress');
-      if (prog && typeof prog.last_completed_index === 'number') {
-        queuePointer = prog.last_completed_index;
-      }
-    } catch(e) {} // non-fatal
   } catch (e) {
     console.warn('API unavailable, using local state', e);
     setSyncStatus(false);
@@ -2589,7 +1492,7 @@ async function bootApp() {
   }
   updateProgSwitchBtn();
   updateStreak();
-  activeDay = getNextUpIndexInclRest();
+  activeDay = getTodayIndex();
   render();
   renderSettings();
 }
@@ -2603,7 +1506,7 @@ function bootOffline() {
   workoutHistory = JSON.parse(localStorage.getItem('workout_history') || '[]');
   prs = JSON.parse(localStorage.getItem('workout_prs') || '{}');
   updateStreak();
-  activeDay = getNextUpIndexInclRest();
+  activeDay = getTodayIndex();
   render();
 }
 
@@ -2646,10 +1549,7 @@ let communityLoaded = false;
 let communityMuscleFilter = 'all';
 let weightUnit = localStorage.getItem('weight_unit') || 'lbs';
 
-// ── QUEUE / ROLLING POINTER ───────────────────────────────────────────────────
-let queuePointer = -1; // index of last completed workout in DAYS array (-1 = none done)
-
-const ALL_MUSCLES = ['all','chest','back','shoulders','biceps','triceps','quads','hamstrings','glutes','calves','abs','forearms','traps'];
+const ALL_MUSCLES = ['all','chest','back','shoulders','biceps','triceps','quads','hamstrings','glutes','calves','abs','forearms'];
 
 
 
@@ -2679,58 +1579,6 @@ function updateStreak(){
   if(chip){if(s>=2){chip.style.display='flex';document.getElementById('streakCount').textContent=s;}else chip.style.display='none';}
 }
 
-// ── QUEUE HELPERS ─────────────────────────────────────────────────────────────
-function getNextUpIndex() {
-  if (!DAYS || !DAYS.length) return 0;
-  // After last_completed_index, find next non-rest day (wrap around)
-  const len = DAYS.length;
-  for (let i = 1; i <= len; i++) {
-    const idx = (queuePointer + i) % len;
-    if (DAYS[idx] && DAYS[idx].type !== 'rest') return idx;
-  }
-  // All rest days? Just go to next
-  return (queuePointer + 1) % len;
-}
-
-function getNextUpIndexInclRest() {
-  if (!DAYS || !DAYS.length) return 0;
-  return (queuePointer + 1) % DAYS.length;
-}
-
-function isNextUp(di) {
-  return di === getNextUpIndexInclRest();
-}
-
-async function completeAndAdvance() {
-  await saveWorkout(true); // pass true = called from queue advance
-}
-
-async function advanceQueue(di) {
-  queuePointer = di;
-  if (activeProgram) {
-    try {
-      await api('POST', '/progress/advance', { program_id: activeProgram.id, completed_index: di });
-    } catch(e) { /* non-fatal */ }
-  }
-  // Jump activeDay to the next one
-  activeDay = getNextUpIndexInclRest();
-  openGroups = {};
-  render();
-  showToast('✅ Workout complete! Next up: ' + DAYS[activeDay].title);
-}
-
-async function resetQueuePointer() {
-  showConfirm('Reset Queue', 'Restart your program from the beginning?', 'Reset', async () => {
-    queuePointer = -1;
-    try { await api('POST', '/progress/reset'); } catch(e) {}
-    activeDay = getNextUpIndexInclRest();
-    openGroups = {};
-    render();
-    showToast('Queue reset — starting fresh!');
-  }, 'danger');
-}
-
-
 // ── INTERACTIONS ──────────────────────────────────────────────────────────────
 function toggleFixed(di,gi,ei){
   if(editMode){openEditModal('fixed',di,gi,ei);return;}
@@ -2748,26 +1596,6 @@ function toggleChoice(di,gi,bi,oi,isMulti,maxPick){
 }
 function toggleGroup(id){openGroups[id]=!openGroups[id];const c=document.getElementById('gc_'+id);if(c)c.classList.toggle('open',openGroups[id]);}
 function saveNote(di,gi,ei,val){const k=noteKey(di,gi,ei);if(val.trim())notes[k]=val.trim();else delete notes[k];saveNotes();}
-
-function buildThisDay(di) {
-  // Open the builder editing the current program, then jump straight to that day
-  if (!activeProgram) return;
-  showSetupScreen(activeProgram);
-  // After builder opens, immediately open day detail for the right day
-  setTimeout(() => openDayDetail(di), 50);
-}
-
-function updateExWeight(di,gi,ei,val){
-  if(!DAYS[di]||!DAYS[di].groups[gi]||!DAYS[di].groups[gi].exs[ei])return;
-  DAYS[di].groups[gi].exs[ei].weight=val;
-  saveProgToAPIDebounced();
-}
-
-function updateChoiceWeight(di,gi,bi,oi,val){
-  if(!DAYS[di]||!DAYS[di].groups[gi]||!DAYS[di].groups[gi].blocks[bi]||!DAYS[di].groups[gi].blocks[bi].opts[oi])return;
-  DAYS[di].groups[gi].blocks[bi].opts[oi].weight=val;
-  saveProgToAPIDebounced();
-}
 function confirmReset(){
   showConfirm('Reset Day','Clear all progress for today?','Reset',()=>{
     if(state[activeDay]){state[activeDay]={fixed:{},choices:{}};saveState();}
@@ -2894,11 +1722,6 @@ function getFilteredHistory(){
 
 // ── UNDO DELETE BUFFER ────────────────────────────────────────────────────────
 let undoBuffer=null;
-function editCurrentProgram() {
-  if (!activeProgram) return;
-  showSetupScreen(activeProgram);
-}
-
 function toggleEditMode(){editMode=!editMode;document.getElementById('editModeBtn').classList.toggle('active-mode',editMode);render();}
 function removeExercise(di,gi,ei){
   const removed=DAYS[di].groups[gi].exs.splice(ei,1)[0];
@@ -3124,17 +1947,12 @@ function saveGroupSettings() {
 document.addEventListener('click', function(e) { if (e.target === document.getElementById('groupSettingsModal')) closeModal('groupSettingsModal'); });
 
 // ── SAVE PROGRAM TO API ───────────────────────────────────────────────────────
-let _progSaveTimer = null;
 async function saveProgToAPI(){
   if(offlineMode||!activeProgram)return;
   try {
     await api('PUT',`/programs/${activeProgram.id}`,{name:activeProgram.name||'My Split',days:DAYS,template_key:activeProgram.template_key||null});
     setSyncStatus(true);
   } catch(e){ setSyncStatus(false); }
-}
-function saveProgToAPIDebounced(){
-  clearTimeout(_progSaveTimer);
-  _progSaveTimer = setTimeout(saveProgToAPI, 800);
 }
 
 // ── PICKER ────────────────────────────────────────────────────────────────────
@@ -3221,7 +2039,7 @@ document.getElementById('createModal').addEventListener('click',function(e){if(e
 document.getElementById('logEditorModal').addEventListener('click',function(e){if(e.target===this)closeModal('logEditorModal');});
 
 // ── SAVE WORKOUT ──────────────────────────────────────────────────────────────
-async function saveWorkout(fromQueue=false){
+async function saveWorkout(){
   const day=DAYS[activeDay];const s=getDayState(activeDay);const exercises=[];let newPRs=[];
   day.groups.forEach((g,gi)=>{
     if(g.type==='fixed'){
@@ -3254,18 +2072,8 @@ async function saveWorkout(fromQueue=false){
   }
   updateStreak();
   const prMsg=newPRs.length>0?'\n\nNew PRs: '+newPRs.join(', ')+' 🏆':'';
-  // Advance queue pointer
-  queuePointer = activeDay;
-  if (activeProgram) {
-    api('POST', '/progress/advance', { program_id: activeProgram.id, completed_index: activeDay }).catch(()=>{});
-  }
   showToast('Workout saved! 💪'+(newPRs.length?' 🏆 '+newPRs.length+' new PR!':''));
-  // Move to next workout
-  const nextIdx = getNextUpIndexInclRest();
-  activeDay = nextIdx;
-  openGroups = {};
-  render();
-  goPage('workout');
+  goPage('history');
 }
 
 function trySetPR(name,weightStr){
@@ -3548,25 +2356,12 @@ function countProgress(di){
 }
 
 // ── RENDER ────────────────────────────────────────────────────────────────────
-var PENCIL='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
-var CHECK='<svg width="11" height="9" viewBox="0 0 12 10" fill="none"><path d="M1 5l3 3 7-7" stroke="#0f0f0f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-var TRASH='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>';
-var SWAP='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 16V4m0 0L3 8m4-4l4 4"/><path d="M17 8v12m0 0l4-4m-4 4l-4-4"/></svg>';
+const PENCIL='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
+const CHECK='<svg width="11" height="9" viewBox="0 0 12 10" fill="none"><path d="M1 5l3 3 7-7" stroke="#0f0f0f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const TRASH='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>';
+const SWAP='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 16V4m0 0L3 8m4-4l4 4"/><path d="M17 8v12m0 0l4-4m-4 4l-4-4"/></svg>';
 
-function renderDayScroll(){
-  const nextUpIdx = getNextUpIndexInclRest();
-  document.getElementById('dayScroll').innerHTML=DAYS.map((d,i)=>{
-    const isActive = i===activeDay;
-    const isNext = i===nextUpIdx;
-    const isDone = queuePointer >= 0 && (
-      // Simple: if index is at or before pointer (accounting for wrap)
-      i === queuePointer || 
-      (queuePointer < nextUpIdx ? (i < nextUpIdx && i > queuePointer) : false)
-    );
-    const badge = isNext && !isActive ? '<span class="next-up-dot"></span>' : '';
-    return `<div class="day-pill ${isActive?'active':''} ${isNext&&!isActive?'next-up':''}" data-type="${d.type}" onclick="setDay(${i})">${badge}<span class="d-label">${d.label}</span><span class="d-type">${isNext&&!isActive?'NEXT':'  '+d.typeName}</span></div>`;
-  }).join('');
-}
+function renderDayScroll(){document.getElementById('dayScroll').innerHTML=DAYS.map((d,i)=>`<div class="day-pill ${i===activeDay?'active':''}" data-type="${d.type}" onclick="setDay(${i})"><span class="d-label">${d.label}</span><span class="d-type">${d.typeName}</span></div>`).join('');}
 
 function renderExTags(ex){const info=getDbInfo(ex.dbId);if(!info)return'';const sec=(info.secondary_muscles||[]).slice(0,2).map(m=>`<span class="ex-tag secondary">${m}</span>`).join('');return`<div class="ex-meta-row"><span class="ex-tag muscle">${info.primary_muscle}</span><span class="ex-tag equip">${info.equipment}</span>${sec}</div>`;}
 function renderOptTags(opt){const info=getDbInfo(opt.dbId);if(!info)return'';const sec=(info.secondary_muscles||[]).slice(0,1).map(m=>`<span class="ex-tag secondary" style="font-size:8px">${m}</span>`).join('');return`<div class="opt-meta"><span class="ex-tag muscle" style="font-size:8px">${info.primary_muscle}</span><span class="ex-tag equip" style="font-size:8px">${info.equipment}</span>${sec}</div>`;}
@@ -3574,65 +2369,48 @@ function renderOptTags(opt){const info=getDbInfo(opt.dbId);if(!info)return'';con
 function render(){
   renderDayScroll();
   const day=DAYS[activeDay];const s=getDayState(activeDay);const{done,total}=countProgress(activeDay);
-  const isThisNextUp = isNextUp(activeDay);
   document.getElementById('sessionTitle').textContent=day.title;
   document.getElementById('progressCount').textContent=total>0?`${done} / ${total}`:'';
   document.getElementById('progressBar').style.width=total>0?(done/total*100)+'%':'0%';
   const content=document.getElementById('mainContent');const saveWrap=document.getElementById('saveWrap');
-  if(day.type==='rest'){
-    content.innerHTML=`<div class="rest-card"><span class="rest-icon">💤</span><div class="rest-title">Rest Day</div><p class="rest-sub">Recovery is part of the program.<br>Light walk or foam rolling if you want.</p>${isThisNextUp?'<button onclick="advanceQueue('+activeDay+')" style="margin-top:16px;background:var(--surface3);border:1px solid var(--border2);color:var(--text);border-radius:var(--radius);padding:12px 24px;font-size:14px;font-weight:700;cursor:pointer;width:100%">Mark Rest Done → Next</button>':''}</div>`;
-    saveWrap.style.display='none';return;
-  }
+  if(day.type==='rest'){content.innerHTML=`<div class="rest-card"><span class="rest-icon">💤</span><div class="rest-title">Rest Day</div><p class="rest-sub">Recovery is part of the program.<br>Light walk or foam rolling if you want.</p></div>`;saveWrap.style.display='none';return;}
   const allDone=total>0&&done===total;
   const showSave=total>0&&(done/total)>=0.8;
   saveWrap.style.display=showSave?'block':'none';
   if(showSave&&!allDone){
-    document.querySelector('.save-workout-btn').textContent=`💾  Save & Advance (${total-done} skipped)`;
+    const remaining=total-done;
+    document.querySelector('.save-workout-btn').textContent=allDone?'💾  Save Workout':`💾  Save Workout (${remaining} skipped)`;
   } else if(allDone){
-    document.querySelector('.save-workout-btn').textContent='💾  Save & Advance →';
+    document.querySelector('.save-workout-btn').textContent='💾  Save Workout';
   }
-  let html='';
-  // NEXT UP banner
-  if(isThisNextUp && !editMode){
-    html+=`<div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);border-radius:var(--radius);padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:8px;"><span style="font-size:16px">▶</span><span style="font-size:13px;font-weight:700;color:var(--text)">NEXT UP</span><span style="font-size:12px;color:var(--text2);margin-left:auto">Check off exercises, then save</span></div>`;
-  }
-  html+=`<div class="done-banner ${allDone?'show':''}"><p>SESSION COMPLETE</p><span>Nice work — rest up and recover.</span></div>`;
-  if(editMode)html=`<div class="edit-hint">✏ Edit mode — tap exercise name to rename weight · 🔄 swap · 🗑 remove</div>`+html;
-
-  // Empty day — show prompt to build it
-  if(!day.groups||!day.groups.length){
-    html+=`<div style="text-align:center;padding:32px 20px;border:1.5px dashed var(--border);border-radius:var(--radius);margin-bottom:12px">
-      <div style="font-size:28px;margin-bottom:10px">📋</div>
-      <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:6px">This day has no exercises yet</div>
-      <div style="font-size:13px;color:var(--muted);margin-bottom:16px">Add exercises to start tracking your workout</div>
-      <button onclick="buildThisDay(${activeDay})" style="background:var(--text);color:#000;border:none;border-radius:var(--radius);padding:12px 24px;font-size:14px;font-weight:800;cursor:pointer">+ Add Exercises</button>
-    </div>`;
-    content.innerHTML=html; return;
-  }
-
+  let html=`<div class="done-banner ${allDone?'show':''}"><p>SESSION COMPLETE</p><span>Nice work — rest up and recover.</span></div>`;
+  if(editMode)html=`<div class="edit-hint">✏️ Edit mode — tap to rename · 🔄 to swap · 🗑 to remove</div>`+html;
   day.groups.forEach((g,gi)=>{
     const gid=activeDay+'_'+gi;if(openGroups[gid]===undefined)openGroups[gid]=true;
     let gDone=0,gTotal=0;
     if(g.type==='fixed'){g.exs.forEach((_,ei)=>{gTotal++;if(s.fixed[exKey(gi,ei)])gDone++;});}
     else{g.blocks.forEach((b,bi)=>{const max=b.multi||1;gTotal+=max;const k=blockKey(gi,bi);if(b.multi)gDone+=(s.choices[k]||[]).length;else if(s.choices[k]!=null)gDone++;});}
-    html+=`<div class="group-card ${openGroups[gid]?'open':''}" id="gc_${gid}"><div class="group-card-header" onclick="toggleGroup('${gid}')"><div class="group-card-left"><span class="group-card-name">${g.name}</span><span class="group-card-count">${gDone}/${gTotal}</span></div><span class="group-card-chevron">▼</span></div><div class="group-card-body">`;
+    html+=`<div class="group-card ${openGroups[gid]?'open':''}" id="gc_${gid}"><div class="group-card-header" onclick="toggleGroup('${gid}')"><div class="group-card-left"><span class="group-card-name">${g.name}</span><span class="group-card-count">${gDone}/${gTotal}</span></div>${editMode?`<button class="group-settings-btn" onclick="event.stopPropagation();openGroupSettings(${activeDay},${gi})">⚙ Edit Group</button>`:'<span class="group-card-chevron">▼</span>'}</div><div class="group-card-body">`;
     if(g.type==='choices'){const autoRule=g.blocks.map(b=>b.multi?`Choose any ${b.multi}`:'Pick 1').join(' · ');html+=`<div class="group-rule">${autoRule}</div>`;}
     else if(g.rule)html+=`<div class="group-rule">${g.rule}</div>`;
     if(g.type==='fixed'){
       (g.exs||[]).forEach((ex,ei)=>{
         const checked=!!s.fixed[exKey(gi,ei)];const prInfo=prs[ex.name];
         const noteVal=notes[noteKey(activeDay,gi,ei)]||'';
-        html+=`<div class="ex-row ${checked?'checked':''}">`;
+        html+=`<div class="ex-row ${checked?'checked':''} ${editMode?'edit-mode':''}">`;
         html+=`<div class="check-circle" onclick="event.stopPropagation();toggleFixed(${activeDay},${gi},${ei})">${CHECK}</div>`;
         html+=`<div class="ex-info"><div class="ex-name">${ex.name}</div>${renderExTags(ex)}`;
-        html+=`<div class="ex-weight-row"><input class="weight-inline-input" placeholder="weight / sets / reps" value="${(ex.weight||'').replace(/"/g,'&quot;')}" onchange="updateExWeight(${activeDay},${gi},${ei},this.value)" onclick="event.stopPropagation()">${prInfo?`<span class="pr-badge">PR ${prInfo.display}</span>`:''}</div>`;
-        html+=`</div>`;
-        html+=`<div class="swap-btn" onclick="event.stopPropagation();openPicker(${activeDay},${gi},'swap',${ei})">${SWAP}</div>`;
-        html+=`<div class="edit-icon" style="color:var(--danger)" onclick="event.stopPropagation();removeExercise(${activeDay},${gi},${ei})">${TRASH}</div>`;
+        html+=`<div class="ex-weight">${ex.weight||'—'}${prInfo?` <span class="pr-badge">PR ${prInfo.display}</span>`:''}</div></div>`;
+        if(editMode){
+          html+=`<div style="display:flex;flex-direction:column;gap:2px;margin-right:2px"><button class="reorder-btn" onclick="event.stopPropagation();reorderExercise(${activeDay},${gi},${ei},-1)">▲</button><button class="reorder-btn" onclick="event.stopPropagation();reorderExercise(${activeDay},${gi},${ei},1)">▼</button></div>`;
+          html+=`<div class="swap-btn" onclick="event.stopPropagation();openPicker(${activeDay},${gi},'swap',${ei})">${SWAP}</div>`;
+          html+=`<div class="edit-icon" onclick="event.stopPropagation();openEditModal('fixed',${activeDay},${gi},${ei})">${PENCIL}</div>`;
+          html+=`<div class="edit-icon" style="color:var(--danger)" onclick="event.stopPropagation();removeExercise(${activeDay},${gi},${ei})">${TRASH}</div>`;
+        }
         html+=`</div>`;
         html+=`<div class="ex-note-row"><input class="note-input" placeholder="Notes, weight, reps..." value="${noteVal.replace(/"/g,'&quot;')}" onchange="saveNote(${activeDay},${gi},${ei},this.value)" onclick="event.stopPropagation()"></div>`;
       });
-      html+=`<button class="add-ex-btn" onclick="openPicker(${activeDay},${gi},'add')">+ Add exercise</button>`;
+      if(editMode)html+=`<button class="add-ex-btn" onclick="openPicker(${activeDay},${gi},'add')">+ Add exercise</button>`;
     } else {
       g.blocks.forEach((b,bi)=>{
         const isMulti=!!b.multi;const maxPick=b.multi||1;const k=blockKey(gi,bi);
@@ -3644,26 +2422,29 @@ function render(){
           const cnk=noteKey(activeDay,gi,bi*1000+oi);const cnoteVal=notes[cnk]||'';
           html+=`<div class="choice-opt ${sel?'selected':''}" onclick="toggleChoice(${activeDay},${gi},${bi},${oi},${isMulti},${maxPick})">`;
           html+=`<div class="radio-dot"><div class="radio-dot-inner"></div></div>`;
-          html+=`<div class="opt-info"><div class="opt-name">${opt.name}</div>${renderOptTags(opt)}`;
-          html+=`<div class="ex-weight-row"><input class="weight-inline-input" placeholder="weight" value="${(opt.weight||'').replace(/"/g,'&quot;')}" onchange="updateChoiceWeight(${activeDay},${gi},${bi},${oi},this.value)" onclick="event.stopPropagation()"></div>`;
-          html+=`${sel&&cnoteVal?`<div class="ex-note">📝 ${cnoteVal}</div>`:''}</div>`;
-          html+=`<div class="edit-icon" style="color:var(--danger)" onclick="event.stopPropagation();removeChoiceOpt(${activeDay},${gi},${bi},${oi})">${TRASH}</div>`;
+          html+=`<div class="opt-info"><div class="opt-name">${opt.name}</div>${renderOptTags(opt)}<div class="opt-weight">${opt.weight||''}</div>${sel&&cnoteVal?`<div class="ex-note">📝 ${cnoteVal}</div>`:''}</div>`;
+          if(editMode){
+            html+=`<div class="swap-btn" onclick="event.stopPropagation();openChoiceSwap(${activeDay},${gi},${bi},${oi})">${SWAP}</div>`;
+            html+=`<div class="edit-icon" onclick="event.stopPropagation();openEditModal('choice',${activeDay},${gi},${bi},${oi})">${PENCIL}</div>`;
+            html+=`<div class="edit-icon" style="color:var(--danger)" onclick="event.stopPropagation();removeChoiceOpt(${activeDay},${gi},${bi},${oi})">${TRASH}</div>`;
+          }
           html+=`</div>`;
-          if(sel){html+=`<div class="note-row"><input class="note-input" placeholder="Weight used / notes..." value="${cnoteVal.replace(/"/g,'&quot;')}" onchange="saveNote(${activeDay},${gi},${bi*1000+oi},this.value)" onclick="event.stopPropagation()"></div>`;}
+          if(sel&&!editMode){html+=`<div class="note-row"><input class="note-input" placeholder="Weight used / notes..." value="${cnoteVal.replace(/"/g,'&quot;')}" onchange="saveNote(${activeDay},${gi},${bi*1000+oi},this.value)" onclick="event.stopPropagation()"></div>`;}
         });
-        html+=`<button class="add-ex-btn" style="margin-top:4px" onclick="openChoiceAdd(${activeDay},${gi},${bi})">+ Add option</button>`;
+        if(editMode)html+=`<button class="add-ex-btn" style="margin-top:4px" onclick="openChoiceAdd(${activeDay},${gi},${bi})">+ Add option</button>`;
         html+=`</div>`;
       });
-      html+=`<button class="add-ex-btn" onclick="openChoiceBlockAdd(${activeDay},${gi})">+ Add choice block</button>`;
+      if(editMode)html+=`<button class="add-ex-btn" onclick="openChoiceBlockAdd(${activeDay},${gi})">+ Add choice block</button>`;
     }
-    html+=`<div style="display:flex;gap:6px;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">`;
-    html+=`<button class="add-ex-btn" style="flex:1;text-align:center" onclick="addNewGroup(${activeDay},${gi},'fixed')">+ Group</button>`;
-    html+=`<button class="add-ex-btn" style="flex:1;text-align:center;color:var(--danger)" onclick="removeGroup(${activeDay},${gi})">✕ Remove group</button>`;
-    html+=`</div>`;
+    if(editMode){
+      html+=`<div style="display:flex;gap:6px;margin-top:10px;padding-top:8px;border-top:1px solid var(--border)">`;
+      html+=`<button class="add-ex-btn" style="flex:1;text-align:center" onclick="addNewGroup(${activeDay},${gi},'fixed')">+ Fixed Group</button>`;
+      html+=`<button class="add-ex-btn" style="flex:1;text-align:center" onclick="addNewGroup(${activeDay},${gi},'choices')">+ Choice Group</button>`;
+      html+=`<button class="add-ex-btn" style="flex:1;text-align:center;color:var(--danger)" onclick="removeGroup(${activeDay},${gi})">✕ Remove</button>`;
+      html+=`</div>`;
+    }
     html+=`</div></div>`;
   });
-  // Bottom add-group button
-  html+=`<button class="add-ex-btn" style="width:100%;text-align:center;margin-top:4px" onclick="addNewGroup(${activeDay},${DAYS[activeDay].groups.length-1},'fixed')">＋ Add Group</button>`;
   content.innerHTML=html;
 }
 
@@ -3679,8 +2460,8 @@ function renderHistory(){
   // Edit mode toggle bar + Add button
   const editBar = `
     <div class="history-edit-bar">
-      <span class="history-edit-label">${historyEditMode ? '✏ Edit Mode — tap a session to modify' : 'Your workout history'}</span>
-      <button class="history-edit-toggle ${historyEditMode?'active':''}" onclick="toggleHistoryEditMode()">${historyEditMode ? 'Done' : '✏ Edit'}</button>
+      <span class="history-edit-label">${historyEditMode ? '✏️ Edit Mode — tap a session to modify' : 'Your workout history'}</span>
+      <button class="history-edit-toggle ${historyEditMode?'active':''}" onclick="toggleHistoryEditMode()">${historyEditMode ? 'Done' : '✏️ Edit'}</button>
     </div>
     ${historyEditMode ? `<div style="padding:12px 16px 4px"><button class="hist-add-btn" onclick="addManualLog()">＋ Add Manual Session</button></div>` : ''}
   `;
@@ -3704,7 +2485,7 @@ function renderHistory(){
       </div>
       ${historyEditMode ? `
         <div class="history-edit-actions">
-          <button class="hist-action-btn edit" onclick="openLogEditor(${entry.id})">✏ Edit Session</button>
+          <button class="hist-action-btn edit" onclick="openLogEditor(${entry.id})">✏️ Edit Session</button>
           <button class="hist-action-btn del" onclick="deleteHistory(${entry.id})">🗑 Delete</button>
         </div>` : `<button class="history-del-btn" onclick="deleteHistory(${entry.id})">Delete Entry</button>`}
     </div>`).join('');

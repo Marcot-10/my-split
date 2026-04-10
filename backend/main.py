@@ -514,7 +514,7 @@ def increment_use_count(exercise_id: int,
 
 # ── Serve PWA — MUST BE LAST (after all /api routes) ─────────────────────────
 
-STATIC_DIR = os.path.join(os.path.dirname(__file__), "static")
+STATIC_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")
 
 if os.path.isdir(STATIC_DIR):
     app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static_assets")
