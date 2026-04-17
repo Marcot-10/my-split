@@ -186,6 +186,17 @@ body.has-app{padding-bottom:calc(var(--nav-h) + var(--safe-bottom))}
 .day-pill[data-type="upper"] .d-label{color:var(--upper)}.day-pill[data-type="upper"].active{border-color:var(--upper)}
 .day-pill[data-type="lower"] .d-label{color:var(--lower)}.day-pill[data-type="lower"].active{border-color:var(--lower)}
 .day-pill[data-type="rest"] .d-label{color:var(--rest)}
+.day-pill.status-done{border-color:rgba(78,203,127,0.5)!important;background:rgba(78,203,127,0.08)}
+.day-pill.status-skip{border-color:rgba(255,80,80,0.35)!important;background:rgba(255,80,80,0.05)}
+.day-pill .d-status{font-size:8px;font-weight:700;margin-top:1px;letter-spacing:.06em}
+.day-pill.status-done .d-status{color:var(--check)}
+.day-pill.status-skip .d-status{color:var(--danger)}
+.skip-workout-btn{width:100%;padding:11px;background:rgba(255,80,80,0.08);border:1px solid rgba(255,80,80,0.25);border-radius:12px;color:var(--danger);font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1.2px;cursor:pointer;transition:background .2s;margin-top:6px}
+.skip-workout-btn:active{background:rgba(255,80,80,0.16)}
+.rename-day-btn{background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer;padding:2px 6px;border-radius:6px;opacity:.6}
+.rename-day-btn:hover{opacity:1;color:var(--text)}
+.current-day-banner{background:rgba(74,158,255,0.1);border:1px solid rgba(74,158,255,0.3);border-radius:10px;padding:10px 16px;margin:0 16px 10px;font-size:13px;color:var(--pull);display:flex;align-items:center;gap:8px}
+.current-day-banner .cdb-arrow{font-size:16px}
 
 /* ── PROGRESS ───────────────────────────────────────────────────────────── */
 .progress-wrap{padding:14px 20px 0}
@@ -560,6 +571,11 @@ body.has-app{padding-bottom:calc(var(--nav-h) + var(--safe-bottom))}
     <div class="content" id="mainContent"></div>
     <div class="save-workout-wrap" id="saveWrap" style="display:none">
       <button class="save-workout-btn" onclick="saveWorkout()">💾  Save Workout</button>
+      <button class="skip-workout-btn" onclick="skipDay()" id="skipDayBtn">⏭  Skip Day</button>
+    </div>
+    <!-- Always-visible skip for days with no progress -->
+    <div id="skipOnlyWrap" style="padding:0 16px 12px;display:none">
+      <button class="skip-workout-btn" onclick="skipDay()">⏭  Mark as Skipped</button>
     </div>
   </div>
 
@@ -569,6 +585,2204 @@ body.has-app{padding-bottom:calc(var(--nav-h) + var(--safe-bottom))}
       <div style="display:flex;gap:6px;flex-wrap:wrap" id="historyFilterChips">
         <div class="filter-chip active" data-filter="all" onclick="setHistoryFilter('all')">All</div>
         <div class="filter-chip" data-filter="push" onclick="setHistoryFilter('push')">Push</div>
+        <div class="filter-chip" data-filter="pull" onclick="setHistoryFilter('pull')">Pull</div>
+        <div class="filter-chip" data-filter="legs" onclick="setHistoryFilter('legs')">Legs</div>
+        <div class="filter-chip" data-filter="upper" onclick="setHistoryFilter('upper')">Upper</div>
+        <div class="filter-chip" data-filter="lower" onclick="setHistoryFilter('lower')">Lower</div>
+      </div>
+    </div>
+    <div class="content" id="historyContent"></div>
+  </div>
+
+  <div id="pageStats" class="page">
+    <div class="stats-section" id="statsContent"></div>
+  </div>
+
+  <div id="pageLibrary" class="page">
+    <div style="display:flex;background:var(--surface2);border-radius:10px;padding:3px;margin:12px 16px 0">
+      <button id="libTabMine" onclick="setLibTab('mine')" style="flex:1;padding:8px;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;background:var(--surface3);color:var(--text);transition:all .2s">My Library</button>
+      <button id="libTabCommunity" onclick="setLibTab('community')" style="flex:1;padding:8px;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;background:none;color:var(--muted);transition:all .2s">Community</button>
+    </div>
+    <div id="libPaneMine">
+      <div class="library-search-wrap"><input class="library-search" id="libSearch" placeholder="Search exercises…" oninput="filterLibrary()"></div>
+      <div class="muscle-tabs" id="libMuscleTabs"></div>
+      <div class="library-list" id="libList"></div>
+    </div>
+    <div id="libPaneCommunity" style="display:none">
+      <div class="library-search-wrap"><input class="library-search" id="communitySearch" placeholder="Search community exercises…" oninput="filterCommunity()"></div>
+      <div class="muscle-tabs" id="communityMuscleTabs"></div>
+      <div class="library-list" id="communityList"></div>
+      <div style="padding:0 16px 16px;text-align:center">
+        <button class="prog-add-btn" onclick="openSubmitCommunityModal()">+ Submit Exercise to Community</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="pageSettings" class="page">
+    <div class="settings-section">
+      <div class="settings-label">Account</div>
+      <div class="settings-row">
+        <div><div class="settings-row-label" id="settingsUsername">—</div><div class="settings-row-sub" id="settingsEmail">—</div></div>
+        <button class="top-btn" onclick="doLogout()">Sign Out</button>
+      </div>
+      <div class="settings-label">Preferences</div>
+      <div class="settings-row">
+        <div><div class="settings-row-label">Weight Unit</div><div class="settings-row-sub">Used throughout the app</div></div>
+        <div style="display:flex;background:var(--surface2);border-radius:20px;border:1px solid var(--border);overflow:hidden">
+          <button id="unitLbsBtn" onclick="setWeightUnit('lbs')" style="padding:6px 14px;border:none;border-radius:20px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;background:none;color:var(--muted);transition:all .2s">lbs</button>
+          <button id="unitKgBtn" onclick="setWeightUnit('kg')" style="padding:6px 14px;border:none;border-radius:20px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;background:none;color:var(--muted);transition:all .2s">kg</button>
+        </div>
+      </div>
+      <div class="settings-label">Program</div>
+      <div class="settings-row">
+        <div><div class="settings-row-label">Active Split</div><div class="settings-row-sub" id="settingsProgramName">Loading…</div></div>
+        <button class="top-btn" onclick="openProgModal()">Switch</button>
+      </div>
+      <div class="settings-label">Data</div>
+      <button class="danger-btn" onclick="clearLocalAndSync()">🗑 Clear Local Cache</button>
+    </div>
+  </div>
+
+  <!-- Rest Timer FAB -->
+  <div class="rest-timer-fab" id="restTimerFab" onclick="openRestTimer()">
+    <span id="fabTimerDisplay">⏱</span>
+    <span class="fab-label">REST</span>
+  </div>
+
+  <nav class="bottom-nav">
+    <button class="nav-item active" id="nav-workout" onclick="goPage('workout')"><span class="nav-icon">🏋️</span><span class="nav-label">Workout</span></button>
+    <button class="nav-item" id="nav-history" onclick="goPage('history')"><span class="nav-icon">📋</span><span class="nav-label">History</span></button>
+    <button class="nav-item" id="nav-stats" onclick="goPage('stats')"><span class="nav-icon">📊</span><span class="nav-label">Stats</span></button>
+    <button class="nav-item" id="nav-library" onclick="goPage('library')"><span class="nav-icon">📚</span><span class="nav-label">Library</span></button>
+    <button class="nav-item" id="nav-settings" onclick="goPage('settings')"><span class="nav-icon">⚙️</span><span class="nav-label">Settings</span></button>
+  </nav>
+</div>
+
+<!-- ── MODALS ─────────────────────────────────────────────────────────────── -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="editModalTitle">EDIT EXERCISE</div>
+    <label class="modal-label">Exercise Name</label>
+    <input class="modal-input" id="editName" placeholder="e.g. Bench Press">
+    <label class="modal-label">Default Weight × Reps</label>
+    <input class="modal-input" id="editWeight" placeholder="e.g. 135 × 8">
+    <button class="modal-btn primary" onclick="saveEdit()">Save Changes</button>
+    <button class="modal-btn secondary" onclick="closeModal('editModal')">Cancel</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="pickerModal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="pickerTitle">ADD EXERCISE</div>
+    <div class="modal-sub" id="pickerContext">Pick an exercise</div>
+    <input class="picker-search" id="pickerSearch" placeholder="Search…" oninput="filterPicker()">
+    <div class="picker-muscle-tabs" id="pickerTabs"></div>
+    <div class="picker-results" id="pickerResults"></div>
+    <input class="picker-weight-input" id="pickerWeight" placeholder="Starting weight × reps  e.g. 135 × 8">
+    <button class="modal-btn green" id="pickerConfirmBtn" onclick="confirmPick()">Add to Workout</button>
+    <button class="modal-btn secondary" onclick="closeModal('pickerModal')">Cancel</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="createModal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">NEW EXERCISE</div>
+    <label class="modal-label">Name</label>
+    <input class="modal-input" id="createName" placeholder="e.g. Cable Rope Curl">
+    <label class="modal-label">Primary Muscle</label>
+    <select class="modal-select" id="createMuscle">
+      <option value="chest">Chest</option><option value="back">Back</option>
+      <option value="shoulders">Shoulders</option><option value="biceps">Biceps</option>
+      <option value="triceps">Triceps</option><option value="quads">Quads</option>
+      <option value="hamstrings">Hamstrings</option><option value="glutes">Glutes</option>
+      <option value="calves">Calves</option><option value="abs">Abs</option>
+    </select>
+    <label class="modal-label">Equipment</label>
+    <select class="modal-select" id="createEquip">
+      <option value="barbell">Barbell</option><option value="dumbbell">Dumbbell</option>
+      <option value="cable">Cable</option><option value="machine">Machine</option>
+      <option value="bodyweight">Bodyweight</option><option value="plate">Plate</option>
+    </select>
+    <label class="modal-label">Category</label>
+    <select class="modal-select" id="createCat">
+      <option value="compound">Compound</option><option value="isolation">Isolation</option>
+    </select>
+    <button class="modal-btn primary" onclick="saveCustomExercise()">Create Exercise</button>
+    <button class="modal-btn secondary" onclick="closeModal('createModal')">Cancel</button>
+  </div>
+</div>
+
+<!-- ── COMMUNITY SUBMIT MODAL ────────────────────────────────────────────── -->
+<div class="modal-overlay" id="communitySubmitModal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">SUBMIT TO COMMUNITY</div>
+    <div style="background:rgba(245,166,35,0.08);border:1px solid rgba(245,166,35,0.2);border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:13px;color:var(--gold)">Submitted exercises are reviewed before appearing to other users.</div>
+    <label class="modal-label">Name</label>
+    <input class="modal-input" id="commName" placeholder="e.g. Landmine Press">
+    <label class="modal-label">Primary Muscle</label>
+    <select class="modal-select" id="commMuscle">
+      <option value="chest">Chest</option><option value="back">Back</option>
+      <option value="shoulders">Shoulders</option><option value="biceps">Biceps</option>
+      <option value="triceps">Triceps</option><option value="quads">Quads</option>
+      <option value="hamstrings">Hamstrings</option><option value="glutes">Glutes</option>
+      <option value="calves">Calves</option><option value="abs">Abs</option>
+      <option value="forearms">Forearms</option>
+    </select>
+    <label class="modal-label">Equipment</label>
+    <select class="modal-select" id="commEquip">
+      <option value="barbell">Barbell</option><option value="dumbbell">Dumbbell</option>
+      <option value="cable">Cable</option><option value="machine">Machine</option>
+      <option value="bodyweight">Bodyweight</option><option value="plate">Plate</option>
+    </select>
+    <label class="modal-label">Category</label>
+    <select class="modal-select" id="commCat">
+      <option value="compound">Compound</option><option value="isolation">Isolation</option>
+    </select>
+    <label class="modal-label">Notes / Cue (optional)</label>
+    <input class="modal-input" id="commNotes" placeholder="e.g. Keep elbows tucked, full ROM" maxlength="300">
+    <button class="modal-btn primary" onclick="submitCommunityExercise()">Submit for Review</button>
+    <button class="modal-btn secondary" onclick="closeModal('communitySubmitModal')">Cancel</button>
+  </div>
+</div>
+
+<!-- ── RENAME DAY MODAL ──────────────────────────────────────────────────── -->
+<div class="modal-overlay" id="renameDayModal">
+  <div class="modal-sheet" style="max-width:420px">
+    <div class="modal-handle"></div>
+    <div class="modal-title">RENAME DAY</div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:14px">Give this day a custom name — e.g. "Chest Day", "Push A", "Monday Grind"</p>
+    <label class="modal-label">Day Name</label>
+    <input class="modal-input" id="renameDayInput" placeholder="e.g. Push Day, Chest & Tris..." maxlength="24" onkeydown="if(event.key==='Enter')confirmRenameDay()">
+    <button class="modal-btn green" onclick="confirmRenameDay()" style="margin-top:4px">Save Name</button>
+    <button class="modal-btn secondary" onclick="closeModal('renameDayModal')">Cancel</button>
+  </div>
+</div>
+
+<!-- ── LOG EDITOR MODAL ──────────────────────────────────────────────────── -->
+<div class="modal-overlay" id="logEditorModal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="logEditorTitle">EDIT SESSION</div>
+    <label class="modal-label">Date</label>
+    <input class="modal-input" id="logEditorDate" type="date">
+    <label class="modal-label">Day Type</label>
+    <select class="modal-select" id="logEditorType">
+      <option value="push">Push</option>
+      <option value="pull">Pull</option>
+      <option value="legs">Legs</option>
+      <option value="upper">Upper</option>
+      <option value="lower">Lower</option>
+      <option value="rest">Rest / Other</option>
+    </select>
+    <label class="modal-label" style="margin-top:12px">Exercises</label>
+    <div id="logEditorExList"></div>
+    <button class="log-add-ex-btn" onclick="logEditorAddEx()">+ Add Exercise</button>
+    <button class="modal-btn green" style="margin-top:16px" onclick="saveLogEdit()">Save Changes</button>
+    <button class="modal-btn secondary" onclick="closeModal('logEditorModal')">Cancel</button>
+  </div>
+</div>
+
+<!-- ── GROUP SETTINGS MODAL ────────────────────────────────────────────── -->
+<div class="modal-overlay" id="groupSettingsModal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">GROUP SETTINGS</div>
+    <label class="modal-label">Group Name</label>
+    <input class="modal-input" id="gsGroupName" placeholder="e.g. Chest Press">
+    <label class="modal-label" id="gsPickLabel">How many to pick</label>
+    <div class="pick-count-row" id="gsPickCountRow"></div>
+    <div id="gsMultiNote" style="font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.5"></div>
+    <button class="modal-btn primary" onclick="saveGroupSettings()">Save</button>
+    <button class="modal-btn secondary" onclick="closeModal('groupSettingsModal')">Cancel</button>
+  </div>
+</div>
+
+<div class="rest-timer-sheet" id="restTimerSheet">
+  <div class="rest-timer-handle"></div>
+  <div class="rest-timer-label">Rest Timer</div>
+  <div class="rest-timer-display" id="restTimerDisplay">1:30</div>
+  <div class="rest-timer-presets">
+    <div class="rest-preset-btn" data-s="60" onclick="setRestPreset(60)">1 min</div>
+    <div class="rest-preset-btn active" data-s="90" onclick="setRestPreset(90)">1:30</div>
+    <div class="rest-preset-btn" data-s="120" onclick="setRestPreset(120)">2 min</div>
+    <div class="rest-preset-btn" data-s="180" onclick="setRestPreset(180)">3 min</div>
+  </div>
+  <div class="rest-timer-actions">
+    <button class="rest-timer-btn primary" id="restTimerStartBtn" onclick="toggleRestTimer()">Start</button>
+    <button class="rest-timer-btn secondary" onclick="closeRestTimer()">Cancel</button>
+  </div>
+</div>
+
+<!-- ── TOAST ──────────────────────────────────────────────────────────────── -->
+<div class="toast" id="toast"></div>
+
+<!-- ── CONFIRM MODAL ──────────────────────────────────────────────────────── -->
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-card">
+    <div class="confirm-title" id="confirmTitle">Are you sure?</div>
+    <div class="confirm-body" id="confirmBody"></div>
+    <div class="confirm-actions">
+      <button class="confirm-btn cancel" onclick="closeConfirm()">Cancel</button>
+      <button class="confirm-btn danger" id="confirmOkBtn">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── CONFIG ────────────────────────────────────────────────────────────────────
+// Change this to your EC2 IP address after setup:
+const API = window.location.origin + '/api';
+
+
+// ── API CLIENT ────────────────────────────────────────────────────────────────
+let authToken = localStorage.getItem('auth_token');
+let currentUser = JSON.parse(localStorage.getItem('current_user') || 'null');
+let offlineMode = false;
+
+async function api(method, path, body = null) {
+  const headers = { 'Content-Type': 'application/json' };
+  if (authToken) headers['Authorization'] = 'Bearer ' + authToken;
+  try {
+    const res = await fetch(API + path, {
+      method,
+      headers,
+      body: body ? JSON.stringify(body) : null
+    });
+    if (res.status === 401) { doLogout(); return null; }
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.detail || 'Request failed');
+    }
+    if (res.status === 204) return null;
+    return res.json();
+  } catch (e) {
+    setSyncStatus(false);
+    throw e;
+  }
+}
+
+function setSyncStatus(online) {
+  const dot = document.getElementById('syncDot');
+  if (dot) { dot.classList.toggle('offline', !online); dot.title = online ? 'Synced' : 'Offline'; }
+}
+
+// ── AUTH ──────────────────────────────────────────────────────────────────────
+function switchAuthTab(tab) {
+  document.getElementById('tabLogin').classList.toggle('active', tab === 'login');
+  document.getElementById('tabRegister').classList.toggle('active', tab === 'register');
+  document.getElementById('loginForm').style.display = tab === 'login' ? 'block' : 'none';
+  document.getElementById('registerForm').style.display = tab === 'register' ? 'block' : 'none';
+  document.getElementById('authError').textContent = '';
+}
+
+async function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  if (!email || !password) return;
+  const btn = document.querySelector('#loginForm .auth-btn');
+  btn.disabled = true; btn.textContent = 'Signing in…';
+  try {
+    const form = new URLSearchParams({ username: email, password });
+    const res = await fetch(API + '/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: form
+    });
+    if (!res.ok) { const e = await res.json(); throw new Error(e.detail); }
+    const data = await res.json();
+    authToken = data.access_token;
+    currentUser = { id: data.user_id, username: data.username };
+    localStorage.setItem('auth_token', authToken);
+    localStorage.setItem('current_user', JSON.stringify(currentUser));
+    await bootApp();
+  } catch (e) {
+    document.getElementById('authError').textContent = e.message;
+  }
+  btn.disabled = false; btn.textContent = 'Sign In';
+}
+
+async function doRegister() {
+  const email = document.getElementById('regEmail').value.trim();
+  const username = document.getElementById('regUsername').value.trim();
+  const password = document.getElementById('regPassword').value;
+  if (!email || !username || !password) return;
+  if (password.length < 8) { document.getElementById('authError').textContent = 'Password must be at least 8 characters'; return; }
+  const btn = document.querySelector('#registerForm .auth-btn');
+  btn.disabled = true; btn.textContent = 'Creating account…';
+  try {
+    const data = await api('POST', '/auth/register', { email, username, password });
+    authToken = data.access_token;
+    currentUser = { id: data.user_id, username: data.username };
+    localStorage.setItem('auth_token', authToken);
+    localStorage.setItem('current_user', JSON.stringify(currentUser));
+    await bootApp();
+  } catch (e) {
+    document.getElementById('authError').textContent = e.message;
+  }
+  btn.disabled = false; btn.textContent = 'Create Account';
+}
+
+function doLogout() {
+  authToken = null; currentUser = null;
+  localStorage.removeItem('auth_token');
+  localStorage.removeItem('current_user');
+  document.getElementById('authScreen').style.display = 'flex';
+  document.getElementById('appShell').style.display = 'none';
+  document.body.classList.remove('has-app');
+}
+
+function goOffline() {
+  offlineMode = true;
+  bootOffline();
+}
+
+// ── TEMPLATES ─────────────────────────────────────────────────────────────────
+const TEMPLATES = {
+  ppl6: {
+    name: 'PPL 6-Day Split',
+    days: [
+      {label:'DAY 1',type:'push',typeName:'Push A',title:'PUSH A',groups:[
+        {name:'Chest',type:'choices',rule:'Fly always · pick 2 presses',blocks:[
+          {label:'Fly — pick 1',opts:[{name:'Cable Fly',weight:'',dbId:'e_cable_fly'},{name:'Machine Fly',weight:'',dbId:'e_machine_fly'},{name:'Standing Cable Fly',weight:'',dbId:'e_standing_fly'}]},
+          {label:'Press — pick 1',opts:[{name:'Bench Press',weight:'',dbId:'e_bench_press'},{name:'Incline Dumbbell Press',weight:'',dbId:'e_incline_db_press'},{name:'Chest Press Machine',weight:'',dbId:'e_chest_press_machine'}]}
+        ]},
+        {name:'Shoulders',type:'fixed',exs:[{name:'Dumbbell Shoulder Press',weight:'',dbId:'e_db_shoulder_press'},{name:'Lateral Raise',weight:'',dbId:'e_lateral_raise'}]},
+        {name:'Triceps',type:'fixed',exs:[{name:'Tricep Pushdown',weight:'',dbId:'e_pushdown'},{name:'Tricep Kickback',weight:'',dbId:'e_kickback'}]}
+      ]},
+      {label:'DAY 2',type:'pull',typeName:'Pull A',title:'PULL A',groups:[
+        {name:'Back — Rows',type:'choices',rule:'Choose any 3 row variations',blocks:[
+          {label:'Rows — pick 3',multi:3,opts:[{name:'Seated Cable Row',weight:'',dbId:'e_seated_row'},{name:'Chest Supported Row',weight:'',dbId:'e_cs_row'},{name:'Single Arm Plate Row',weight:'',dbId:'e_sa_plate_row'},{name:'Single Arm Dumbbell Row',weight:'',dbId:'e_single_arm_row'},{name:'Barbell Bent-Over Row',weight:'',dbId:'e_bb_row'}]}
+        ]},
+        {name:'Posterior Chain',type:'fixed',exs:[{name:'Back Extension',weight:'',dbId:'e_back_extension'}]},
+        {name:'Rear Delts',type:'choices',rule:'Pick 1',blocks:[
+          {label:'Rear Delt — pick 1',opts:[{name:'Rear Delt Machine',weight:'',dbId:'e_rear_delt_machine'},{name:'Reverse Fly',weight:'',dbId:'e_reverse_fly'}]}
+        ]},
+        {name:'Biceps',type:'fixed',exs:[{name:'Preacher Curl',weight:'',dbId:'e_preacher_curl'},{name:'Bayesian Cable Curl',weight:'',dbId:'e_bayesian_curl'}]}
+      ]},
+      {label:'DAY 3',type:'legs',typeName:'Legs A',title:'LEGS A',groups:[
+        {name:'Warm-Up',type:'fixed',exs:[{name:'Adduction Machine',weight:'light',dbId:'e_adduction_machine'}]},
+        {name:'Quads — main press',type:'choices',rule:'Pick 1 main movement',blocks:[
+          {label:'Main press — pick 1',opts:[{name:'Hack Squat',weight:'',dbId:'e_hack_squat'},{name:'Leg Press',weight:'',dbId:'e_leg_press'},{name:'Machine Leg Press',weight:'',dbId:'e_leg_press'}]}
+        ]},
+        {name:'Quad Accessory',type:'fixed',exs:[{name:'Leg Extension',weight:'',dbId:'e_leg_ext'}]},
+        {name:'Hamstrings',type:'fixed',exs:[{name:'Lying Leg Curl',weight:'',dbId:'e_leg_curl'}]},
+        {name:'Calves',type:'fixed',exs:[{name:'Standing Calf Raise',weight:'',dbId:'e_calf_raise'}]}
+      ]},
+      {label:'DAY 4',type:'push',typeName:'Push B',title:'PUSH B',groups:[
+        {name:'Chest',type:'fixed',exs:[{name:'Incline Plate Press',weight:'',dbId:'e_incline_plate_press'},{name:'Chest Press Machine',weight:'',dbId:'e_chest_press_machine'}]},
+        {name:'Chest Fly',type:'choices',rule:'Pick 1',blocks:[
+          {label:'Fly — pick 1',opts:[{name:'Cable Fly',weight:'',dbId:'e_cable_fly'},{name:'Machine Fly',weight:'',dbId:'e_machine_fly'},{name:'Standing Cable Fly',weight:'',dbId:'e_standing_fly'}]}
+        ]},
+        {name:'Shoulders',type:'fixed',exs:[{name:'Lateral Raise Machine',weight:'',dbId:'e_lateral_raise_machine'},{name:'Dumbbell Shoulder Press',weight:'',dbId:'e_db_shoulder_press'}]},
+        {name:'Triceps',type:'fixed',exs:[{name:'Tricep Pushdown',weight:'',dbId:'e_pushdown'}]}
+      ]},
+      {label:'DAY 5',type:'pull',typeName:'Pull B',title:'PULL B',groups:[
+        {name:'Back — Width',type:'choices',rule:'Choose any 3 back exercises',blocks:[
+          {label:'Width — pick 3',multi:3,opts:[{name:'Lat Pulldown',weight:'',dbId:'e_lat_pulldown'},{name:'Single Arm Dumbbell Row',weight:'',dbId:'e_single_arm_row'},{name:'Chest Supported Row',weight:'',dbId:'e_cs_row'},{name:'Seated Cable Row',weight:'',dbId:'e_seated_row'},{name:'Barbell Bent-Over Row',weight:'',dbId:'e_bb_row'}]}
+        ]},
+        {name:'Posterior Chain',type:'fixed',exs:[{name:'Back Extension',weight:'',dbId:'e_back_extension'}]},
+        {name:'Rear Delts',type:'choices',rule:'Pick 1',blocks:[
+          {label:'Rear Delt — pick 1',opts:[{name:'Rear Delt Machine',weight:'',dbId:'e_rear_delt_machine'},{name:'Reverse Fly',weight:'',dbId:'e_reverse_fly'}]}
+        ]},
+        {name:'Biceps',type:'fixed',exs:[{name:'Nautilus Curl',weight:'',dbId:'e_nautilus_curl'},{name:'Bayesian Cable Curl',weight:'',dbId:'e_bayesian_curl'},{name:'Preacher Curl',weight:'',dbId:'e_preacher_curl'}]}
+      ]},
+      {label:'DAY 6',type:'legs',typeName:'Legs B',title:'LEGS B',groups:[
+        {name:'Warm-Up',type:'fixed',exs:[{name:'Adduction Machine',weight:'light',dbId:'e_adduction_machine'}]},
+        {name:'Quads — main press',type:'choices',rule:'Pick 1 main movement',blocks:[
+          {label:'Main press — pick 1',opts:[{name:'Hack Squat',weight:'',dbId:'e_hack_squat'},{name:'Leg Press',weight:'',dbId:'e_leg_press'},{name:'Machine Leg Press',weight:'',dbId:'e_leg_press'}]}
+        ]},
+        {name:'Quad Accessory',type:'fixed',exs:[{name:'Leg Extension',weight:'',dbId:'e_leg_ext'}]},
+        {name:'Hamstrings',type:'fixed',exs:[{name:'Lying Leg Curl',weight:'',dbId:'e_leg_curl'}]},
+        {name:'Calves',type:'fixed',exs:[{name:'Standing Calf Raise',weight:'',dbId:'e_calf_raise'}]}
+      ]},
+      {label:'REST',type:'rest',typeName:'Rest',title:'REST + ABS',groups:[
+        {name:'Abs (2–3x / week)',type:'fixed',exs:[{name:'Ab Machine',weight:'',dbId:'e_ab_machine'},{name:'Cable Crunches',weight:'',dbId:'e_cable_crunch'}]}
+      ]}
+    ]
+  },
+  upper_lower: {
+    name: 'Upper / Lower Split',
+    days: [
+      {label:'DAY 1',type:'upper',typeName:'Upper A',title:'UPPER A',groups:[
+        {name:'Chest',type:'fixed',exs:[{name:'Bench Press',weight:'',dbId:'e_bench_press'},{name:'Incline Dumbbell Press',weight:'',dbId:'e_incline_db_press'}]},
+        {name:'Back',type:'fixed',exs:[{name:'Seated Cable Row',weight:'',dbId:'e_seated_row'},{name:'Chest Supported Row',weight:'',dbId:'e_cs_row'}]},
+        {name:'Shoulders',type:'fixed',exs:[{name:'Lateral Raise',weight:'',dbId:'e_lateral_raise'},{name:'Tricep Pushdown',weight:'',dbId:'e_pushdown'}]},
+        {name:'Biceps',type:'fixed',exs:[{name:'Preacher Curl',weight:'',dbId:'e_preacher_curl'}]}
+      ]},
+      {label:'DAY 2',type:'lower',typeName:'Lower A',title:'LOWER A',groups:[
+        {name:'Quads',type:'choices',rule:'Pick 1 main',blocks:[{label:'Main press',opts:[{name:'Hack Squat',weight:'',dbId:'e_hack_squat'},{name:'Leg Press',weight:'',dbId:'e_leg_press'},{name:'Machine Leg Press',weight:'',dbId:'e_leg_press'}]}]},
+        {name:'Accessory',type:'fixed',exs:[{name:'Leg Extension',weight:'',dbId:'e_leg_ext'}]},
+        {name:'Hamstrings',type:'fixed',exs:[{name:'Lying Leg Curl',weight:'',dbId:'e_leg_curl'}]},
+        {name:'Glutes + Calves',type:'fixed',exs:[{name:'Standing Calf Raise',weight:'',dbId:'e_calf_raise'},{name:'Adduction Machine',weight:'',dbId:'e_adduction_machine'}]}
+      ]},
+      {label:'REST',type:'rest',typeName:'Rest',title:'REST',groups:[]},
+      {label:'DAY 3',type:'upper',typeName:'Upper B',title:'UPPER B',groups:[
+        {name:'Chest',type:'fixed',exs:[{name:'Incline Plate Press',weight:'',dbId:'e_incline_plate_press'},{name:'Machine Fly',weight:'',dbId:'e_machine_fly'}]},
+        {name:'Back',type:'fixed',exs:[{name:'Single Arm Dumbbell Row',weight:'',dbId:'e_single_arm_row'},{name:'Lat Pulldown',weight:'',dbId:'e_lat_pulldown'}]},
+        {name:'Shoulders',type:'fixed',exs:[{name:'Rear Delt Machine',weight:'',dbId:'e_rear_delt_machine'},{name:'Dumbbell Shoulder Press',weight:'',dbId:'e_db_shoulder_press'}]},
+        {name:'Arms',type:'fixed',exs:[{name:'Bayesian Cable Curl',weight:'',dbId:'e_bayesian_curl'},{name:'Overhead Tricep Extension',weight:'',dbId:'e_overhead_ext'}]}
+      ]},
+      {label:'DAY 4',type:'lower',typeName:'Lower B',title:'LOWER B',groups:[
+        {name:'Quads',type:'choices',rule:'Pick 1 main',blocks:[{label:'Main press',opts:[{name:'Leg Press',weight:'',dbId:'e_leg_press'},{name:'Hack Squat',weight:'',dbId:'e_hack_squat'}]}]},
+        {name:'Hamstrings',type:'fixed',exs:[{name:'Lying Leg Curl',weight:'',dbId:'e_leg_curl'},{name:'Hip Thrust',weight:'',dbId:'e_hip_thrust'}]},
+        {name:'Calves',type:'fixed',exs:[{name:'Standing Calf Raise',weight:'',dbId:'e_calf_raise'}]}
+      ]},
+      {label:'REST',type:'rest',typeName:'Rest',title:'REST',groups:[]},
+      {label:'REST',type:'rest',typeName:'Rest',title:'REST',groups:[]}
+    ]
+  },
+  pplul: {
+    name: 'PPLUL 5-Day Split',
+    days: [
+      {label:'DAY 1',type:'push',typeName:'Push',title:'PUSH',groups:[
+        {name:'Chest',type:'fixed',exs:[{name:'Bench Press',weight:'',dbId:'e_bench_press'},{name:'Incline Dumbbell Press',weight:'',dbId:'e_incline_db_press'},{name:'Cable Fly',weight:'',dbId:'e_cable_fly'}]},
+        {name:'Shoulders',type:'fixed',exs:[{name:'Lateral Raise',weight:'',dbId:'e_lateral_raise'}]},
+        {name:'Triceps',type:'fixed',exs:[{name:'Tricep Pushdown',weight:'',dbId:'e_pushdown'}]}
+      ]},
+      {label:'DAY 2',type:'pull',typeName:'Pull',title:'PULL',groups:[
+        {name:'Back',type:'fixed',exs:[{name:'Lat Pulldown',weight:'',dbId:'e_lat_pulldown'},{name:'Seated Cable Row',weight:'',dbId:'e_seated_row'},{name:'Chest Supported Row',weight:'',dbId:'e_cs_row'}]},
+        {name:'Rear Delts',type:'fixed',exs:[{name:'Rear Delt Machine',weight:'',dbId:'e_rear_delt_machine'}]},
+        {name:'Biceps',type:'fixed',exs:[{name:'Preacher Curl',weight:'',dbId:'e_preacher_curl'}]}
+      ]},
+      {label:'DAY 3',type:'legs',typeName:'Legs',title:'LEGS',groups:[
+        {name:'Quads',type:'choices',rule:'Pick 1 main',blocks:[{label:'Main press',opts:[{name:'Hack Squat',weight:'',dbId:'e_hack_squat'},{name:'Leg Press',weight:'',dbId:'e_leg_press'},{name:'Machine Leg Press',weight:'',dbId:'e_leg_press'}]}]},
+        {name:'Accessory',type:'fixed',exs:[{name:'Leg Extension',weight:'',dbId:'e_leg_ext'},{name:'Lying Leg Curl',weight:'',dbId:'e_leg_curl'}]},
+        {name:'Calves + Adductors',type:'fixed',exs:[{name:'Standing Calf Raise',weight:'',dbId:'e_calf_raise'},{name:'Adduction Machine',weight:'',dbId:'e_adduction_machine'}]}
+      ]},
+      {label:'DAY 4',type:'upper',typeName:'Upper',title:'UPPER',groups:[
+        {name:'Chest',type:'fixed',exs:[{name:'Incline Plate Press',weight:'',dbId:'e_incline_plate_press'}]},
+        {name:'Back',type:'choices',rule:'Pick 1',blocks:[{label:'Row variation',opts:[{name:'Single Arm Dumbbell Row',weight:'',dbId:'e_single_arm_row'},{name:'Chest Supported Row',weight:'',dbId:'e_cs_row'},{name:'Seated Cable Row',weight:'',dbId:'e_seated_row'}]}]},
+        {name:'Shoulders',type:'fixed',exs:[{name:'Dumbbell Shoulder Press',weight:'',dbId:'e_db_shoulder_press'},{name:'Lateral Raise Machine',weight:'',dbId:'e_lateral_raise_machine'}]},
+        {name:'Arms',type:'fixed',exs:[{name:'Bayesian Cable Curl',weight:'',dbId:'e_bayesian_curl'},{name:'Overhead Tricep Extension',weight:'',dbId:'e_overhead_ext'}]}
+      ]},
+      {label:'DAY 5',type:'lower',typeName:'Lower',title:'LOWER',groups:[
+        {name:'Quads',type:'choices',rule:'Pick 1 main',blocks:[{label:'Main press',opts:[{name:'Leg Press',weight:'',dbId:'e_leg_press'},{name:'Hack Squat',weight:'',dbId:'e_hack_squat'}]}]},
+        {name:'Hamstrings',type:'fixed',exs:[{name:'Lying Leg Curl',weight:'',dbId:'e_leg_curl'},{name:'Hip Thrust',weight:'',dbId:'e_hip_thrust'}]},
+        {name:'Calves',type:'fixed',exs:[{name:'Standing Calf Raise',weight:'',dbId:'e_calf_raise'}]}
+      ]},
+      {label:'REST',type:'rest',typeName:'Rest',title:'REST',groups:[]},
+      {label:'REST',type:'rest',typeName:'Rest',title:'REST',groups:[]}
+    ]
+  },
+  fullbody: {
+    name: 'Full Body 3-Day',
+    days: [
+      {label:'DAY 1',type:'upper',typeName:'Full Body A',title:'FULL BODY A',groups:[
+        {name:'Chest',type:'fixed',exs:[{name:'Bench Press',weight:'',dbId:'e_bench_press'}]},
+        {name:'Back',type:'fixed',exs:[{name:'Lat Pulldown',weight:'',dbId:'e_lat_pulldown'}]},
+        {name:'Legs',type:'fixed',exs:[{name:'Hack Squat',weight:'',dbId:'e_hack_squat'}]},
+        {name:'Shoulders',type:'fixed',exs:[{name:'Lateral Raise',weight:'',dbId:'e_lateral_raise'}]},
+        {name:'Arms',type:'fixed',exs:[{name:'Cable Curl',weight:'',dbId:'e_bayesian_curl'},{name:'Tricep Pushdown',weight:'',dbId:'e_pushdown'}]}
+      ]},
+      {label:'REST',type:'rest',typeName:'Rest',title:'REST',groups:[]},
+      {label:'DAY 2',type:'upper',typeName:'Full Body B',title:'FULL BODY B',groups:[
+        {name:'Chest',type:'fixed',exs:[{name:'Incline Dumbbell Press',weight:'',dbId:'e_incline_db_press'}]},
+        {name:'Back',type:'fixed',exs:[{name:'Seated Cable Row',weight:'',dbId:'e_seated_row'}]},
+        {name:'Legs',type:'fixed',exs:[{name:'Leg Press',weight:'',dbId:'e_leg_press'},{name:'Lying Leg Curl',weight:'',dbId:'e_leg_curl'}]},
+        {name:'Shoulders',type:'fixed',exs:[{name:'Rear Delt Machine',weight:'',dbId:'e_rear_delt_machine'}]},
+        {name:'Arms',type:'fixed',exs:[{name:'Preacher Curl',weight:'',dbId:'e_preacher_curl'},{name:'Skull Crushers',weight:'',dbId:'e_skull_crushers'}]}
+      ]},
+      {label:'REST',type:'rest',typeName:'Rest',title:'REST',groups:[]},
+      {label:'DAY 3',type:'upper',typeName:'Full Body C',title:'FULL BODY C',groups:[
+        {name:'Chest',type:'fixed',exs:[{name:'Chest Press Machine',weight:'',dbId:'e_chest_press_machine'},{name:'Cable Fly',weight:'',dbId:'e_cable_fly'}]},
+        {name:'Back',type:'fixed',exs:[{name:'Single Arm Dumbbell Row',weight:'',dbId:'e_single_arm_row'}]},
+        {name:'Legs',type:'fixed',exs:[{name:'Bulgarian Split Squat',weight:'',dbId:'e_bulgarian_split_squat'}]},
+        {name:'Arms',type:'fixed',exs:[{name:'Bayesian Cable Curl',weight:'',dbId:'e_bayesian_curl'},{name:'Overhead Tricep Extension',weight:'',dbId:'e_overhead_ext'}]}
+      ]},
+      {label:'REST',type:'rest',typeName:'Rest',title:'REST',groups:[]},
+      {label:'REST',type:'rest',typeName:'Rest',title:'REST',groups:[]}
+    ]
+  },
+  custom: {
+    name: 'My Custom Split',
+    days: [
+      {label:'DAY 1',type:'push',typeName:'Day 1',title:'DAY 1',groups:[]},
+      {label:'DAY 2',type:'pull',typeName:'Day 2',title:'DAY 2',groups:[]},
+      {label:'DAY 3',type:'legs',typeName:'Day 3',title:'DAY 3',groups:[]},
+      {label:'DAY 4',type:'upper',typeName:'Day 4',title:'DAY 4',groups:[]},
+      {label:'DAY 5',type:'lower',typeName:'Day 5',title:'DAY 5',groups:[]},
+      {label:'DAY 6',type:'push',typeName:'Day 6',title:'DAY 6',groups:[]},
+      {label:'REST',type:'rest',typeName:'Rest',title:'REST',groups:[]}
+    ]
+  }
+};
+
+let selectedTemplate = 'ppl6';
+let allPrograms = [];
+
+function selectTemplate(tpl) {
+  selectedTemplate = tpl;
+  document.querySelectorAll('.template-card').forEach(c => c.classList.toggle('selected', c.dataset.tpl === tpl));
+  const tplData = TEMPLATES[tpl];
+  const nameInput = document.getElementById('setupProgramName');
+  if (!nameInput.value || Object.values(TEMPLATES).some(t => t.name === nameInput.value)) {
+    nameInput.value = tplData.name;
+  }
+  if (tpl === 'custom') {
+    setTimeout(openCustomBuilder, 80);
+  }
+}
+
+// ── CUSTOM SPLIT BUILDER ─────────────────────────────────────────────────────
+const CB_DAYS = ['DAY 1','DAY 2','DAY 3','DAY 4','DAY 5','DAY 6','REST'];
+const CB_TYPES = [
+  {key:'push',label:'Push',emoji:'💪'},
+  {key:'pull',label:'Pull',emoji:'🔙'},
+  {key:'legs',label:'Legs',emoji:'🦵'},
+  {key:'upper',label:'Upper',emoji:'⬆️'},
+  {key:'lower',label:'Lower',emoji:'⬇️'},
+  {key:'fullbody',label:'Full Body',emoji:'🌐'},
+  {key:'rest',label:'Rest',emoji:'😴'},
+];
+
+let cbTrainingDays = 4;       // how many training days
+let cbDayData = [];           // [{label,type,typeName,title,exercises:[{id,name,muscle,equipment}]}]
+let cbEditingDay = null;      // index into cbDayData being edited
+let cbExMuscleFilter = 'all';
+let cbSavedBuilderDays = null; // for returning from day editor
+
+function openCustomBuilder() {
+  document.getElementById('programSetup').style.display = 'none';
+  document.getElementById('customBuilder').style.display = 'flex';
+  if (cbDayData.length === 0) initCbDays(cbTrainingDays);
+  renderCbDayCount();
+  renderCbSchedule();
+  document.getElementById('cbName').value = document.getElementById('setupProgramName').value || 'My Custom Split';
+}
+
+function closeCustomBuilder() {
+  document.getElementById('customBuilder').style.display = 'none';
+  document.getElementById('programSetup').style.display = 'flex';
+  // deselect custom card
+  document.querySelectorAll('.template-card').forEach(c => c.classList.remove('selected'));
+  selectedTemplate = 'ppl6';
+  document.querySelectorAll('.template-card').forEach(c => c.classList.toggle('selected', c.dataset.tpl === 'ppl6'));
+}
+
+function initCbDays(n) {
+  const types = ['push','pull','legs','rest','push','pull','rest'];
+  let trainingCount = 0;
+  cbDayData = Array.from({length: 7}, (_, i) => {
+    const isTraining = i < n;
+    const tp = isTraining ? (types[i % types.length]) : 'rest';
+    const tpInfo = CB_TYPES.find(t => t.key === tp);
+    const label = isTraining ? ('DAY ' + (i + 1)) : 'REST';
+    return {label, type: tp, typeName: tpInfo ? tpInfo.label : 'Rest', title: (tpInfo ? tpInfo.label : 'Rest').toUpperCase(), exercises: []};
+  });
+}
+
+function setCbDayCount(n) {
+  cbTrainingDays = n;
+  initCbDays(n);
+  renderCbDayCount();
+  renderCbSchedule();
+}
+
+function renderCbDayCount() {
+  const row = document.getElementById('cbDayCountRow');
+  row.innerHTML = [2,3,4,5,6].map(n => `
+    <button onclick="setCbDayCount(${n})" style="flex:1;padding:10px 0;border-radius:10px;border:2px solid ${n===cbTrainingDays?'var(--check)':'var(--border)'};background:${n===cbTrainingDays?'rgba(78,203,127,.1)':'var(--surface2)'};color:${n===cbTrainingDays?'var(--check)':'var(--text)'};font-weight:700;font-size:15px;cursor:pointer">${n}</button>
+  `).join('');
+}
+
+let cbDragSrc = null;
+function renderCbSchedule() {
+  const el = document.getElementById('cbSchedule');
+  el.innerHTML = cbDayData.map((day, i) => {
+    const tpInfo = CB_TYPES.find(t => t.key === day.type) || CB_TYPES[CB_TYPES.length-1];
+    const exCount = (day.exercises||[]).length;
+    const isRest = day.type === 'rest';
+    return `
+    <div class="cb-day-card" draggable="true"
+      ondragstart="cbDragSrc=${i};event.dataTransfer.effectAllowed='move'"
+      ondragover="event.preventDefault();event.dataTransfer.dropEffect='move'"
+      ondrop="event.preventDefault();cbDropDay(${i})"
+      style="display:flex;align-items:center;gap:10px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:12px 14px;cursor:grab;touch-action:none">
+      <span style="font-size:18px;opacity:.5">⠿</span>
+      <div style="width:36px;height:36px;border-radius:8px;background:${isRest?'var(--surface3)':'rgba(78,203,127,.12)'};display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">${tpInfo.emoji}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:700;font-size:14px;color:var(--text)">${day.label} — ${tpInfo.label}</div>
+        <div style="font-size:12px;color:var(--muted)">${isRest ? 'Rest / recovery' : exCount > 0 ? `${exCount} exercise${exCount!==1?'s':''}` : 'Tap to add exercises'}</div>
+      </div>
+      <button onclick="openCbDayEditor(${i})" style="background:var(--surface3);border:none;border-radius:8px;padding:7px 12px;color:var(--text);font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0">${isRest?'Change':'Edit'}</button>
+    </div>`;
+  }).join('');
+}
+
+function cbDropDay(targetIdx) {
+  if (cbDragSrc === null || cbDragSrc === targetIdx) { cbDragSrc = null; return; }
+  const moved = cbDayData.splice(cbDragSrc, 1)[0];
+  cbDayData.splice(targetIdx, 0, moved);
+  cbDragSrc = null;
+  renderCbSchedule();
+}
+
+function openCbDayEditor(dayIdx) {
+  cbEditingDay = dayIdx;
+  cbExMuscleFilter = 'all';
+  const day = cbDayData[dayIdx];
+  document.getElementById('cbDayEditorTitle').textContent = `${day.label} — ${day.typeName || day.type.toUpperCase()}`;
+  document.getElementById('customBuilder').style.display = 'none';
+  document.getElementById('cbDayEditor').style.display = 'flex';
+  document.getElementById('cbExSearch').value = '';
+  renderCbDayTypes(dayIdx);
+  renderCbMuscleFilters();
+  filterCbExercises();
+  renderCbDaySelected();
+}
+
+function closeCbDayEditor() {
+  document.getElementById('cbDayEditor').style.display = 'none';
+  document.getElementById('customBuilder').style.display = 'flex';
+  renderCbSchedule();
+}
+
+function renderCbDayTypes(dayIdx) {
+  const day = cbDayData[dayIdx];
+  const row = document.getElementById('cbDayTypeRow');
+  row.innerHTML = CB_TYPES.map(tp => {
+    const sel = day.type === tp.key;
+    return `<button onclick="setCbDayType(${dayIdx},'${tp.key}')" style="padding:7px 12px;border-radius:20px;border:2px solid ${sel?'var(--check)':'var(--border)'};background:${sel?'rgba(78,203,127,.1)':'var(--surface2)'};color:${sel?'var(--check)':'var(--muted)'};font-size:12px;font-weight:600;cursor:pointer">${tp.emoji} ${tp.label}</button>`;
+  }).join('');
+}
+
+function setCbDayType(dayIdx, typeKey) {
+  const tpInfo = CB_TYPES.find(t => t.key === typeKey);
+  cbDayData[dayIdx].type = typeKey;
+  cbDayData[dayIdx].typeName = tpInfo.label;
+  cbDayData[dayIdx].title = tpInfo.label.toUpperCase();
+  document.getElementById('cbDayEditorTitle').textContent = `${cbDayData[dayIdx].label} — ${tpInfo.label}`;
+  renderCbDayTypes(dayIdx);
+  filterCbExercises();
+}
+
+const CB_MUSCLES = ['all','chest','back','shoulders','biceps','triceps','quads','hamstrings','glutes','calves','abs'];
+function renderCbMuscleFilters() {
+  const row = document.getElementById('cbMuscleFilterRow');
+  row.innerHTML = CB_MUSCLES.map(m => {
+    const sel = cbExMuscleFilter === m;
+    return `<button onclick="setCbMuscle('${m}')" style="padding:5px 10px;border-radius:16px;border:1.5px solid ${sel?'var(--check)':'var(--border)'};background:${sel?'rgba(78,203,127,.1)':'var(--surface2)'};color:${sel?'var(--check)':'var(--muted)'};font-size:11px;font-weight:600;cursor:pointer;text-transform:capitalize">${m==='all'?'All':m}</button>`;
+  }).join('');
+}
+
+function setCbMuscle(m) { cbExMuscleFilter = m; renderCbMuscleFilters(); filterCbExercises(); }
+
+function filterCbExercises() {
+  const query = (document.getElementById('cbExSearch')?.value || '').toLowerCase();
+  const day = cbDayData[cbEditingDay];
+  const selectedIds = new Set((day.exercises||[]).map(e=>e.id));
+  let list = allExercises.filter(ex => {
+    if (cbExMuscleFilter !== 'all' && ex.primary_muscle !== cbExMuscleFilter) return false;
+    if (query && !ex.name.toLowerCase().includes(query) && !ex.primary_muscle.toLowerCase().includes(query)) return false;
+    return true;
+  });
+  const el = document.getElementById('cbExList');
+  if (!list.length) { el.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:8px">No exercises found</div>'; return; }
+  el.innerHTML = list.map(ex => {
+    const added = selectedIds.has(ex.id);
+    return `<div onclick="cbToggleExercise('${ex.id}')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:${added?'rgba(78,203,127,.08)':'var(--surface2)'};border:1.5px solid ${added?'var(--check)':'var(--border)'};border-radius:10px;cursor:pointer">
+      <div style="width:20px;height:20px;border-radius:50%;border:2px solid ${added?'var(--check)':'var(--border)'};background:${added?'var(--check)':'transparent'};flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;color:#000">${added?'✓':''}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:600;color:var(--text)">${ex.name}</div>
+        <div style="font-size:11px;color:var(--muted)">${ex.primary_muscle} · ${ex.equipment}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function cbToggleExercise(exId) {
+  const day = cbDayData[cbEditingDay];
+  const idx = (day.exercises||[]).findIndex(e=>e.id===exId);
+  if (idx>=0) { day.exercises.splice(idx,1); }
+  else {
+    const ex = allExercises.find(e=>e.id===exId);
+    if (ex) day.exercises.push({id:ex.id,name:ex.name,muscle:ex.primary_muscle,equipment:ex.equipment});
+  }
+  filterCbExercises();
+  renderCbDaySelected();
+}
+
+function renderCbDaySelected() {
+  const day = cbDayData[cbEditingDay];
+  const exs = day.exercises || [];
+  document.getElementById('cbDayExCount').textContent = exs.length ? `(${exs.length})` : '';
+  const el = document.getElementById('cbDayExSelected');
+  if (!exs.length) { el.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:8px">No exercises added yet</div>'; return; }
+  el.innerHTML = exs.map((ex,i) => `
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:10px">
+      <span style="color:var(--muted);font-size:12px;width:18px">${i+1}</span>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:600;color:var(--text)">${ex.name}</div>
+        <div style="font-size:11px;color:var(--muted)">${ex.muscle} · ${ex.equipment}</div>
+      </div>
+      <button onclick="cbRemoveExercise(${i})" style="background:none;border:none;color:var(--danger);font-size:16px;cursor:pointer;padding:4px">✕</button>
+    </div>`).join('');
+}
+
+function cbRemoveExercise(idx) {
+  cbDayData[cbEditingDay].exercises.splice(idx,1);
+  filterCbExercises();
+  renderCbDaySelected();
+}
+
+async function saveCustomSplit() {
+  const name = document.getElementById('cbName').value.trim() || 'My Custom Split';
+  // Convert cbDayData into the program days format
+  const days = cbDayData.map(day => {
+    const groups = [];
+    if (day.type !== 'rest' && day.exercises && day.exercises.length > 0) {
+      // Group by muscle
+      const byMuscle = {};
+      day.exercises.forEach(ex => {
+        const m = ex.muscle || 'other';
+        if (!byMuscle[m]) byMuscle[m] = [];
+        byMuscle[m].push(ex);
+      });
+      Object.entries(byMuscle).forEach(([muscle, exs]) => {
+        groups.push({
+          name: muscle.charAt(0).toUpperCase() + muscle.slice(1),
+          type: 'fixed',
+          exs: exs.map(ex => ({name: ex.name, weight: '', dbId: ex.id}))
+        });
+      });
+    }
+    return { label: day.label, type: day.type, typeName: day.typeName || day.type, title: day.title || day.type.toUpperCase(), groups };
+  });
+  const btn = document.getElementById('cbSaveBtn');
+  btn.disabled = true; btn.textContent = 'Saving…';
+  try {
+    const prog = await api('POST', '/programs', { name, days, template_key: 'custom' });
+    activeProgram = prog;
+    allPrograms.unshift(prog);
+    DAYS = prog.days;
+    document.getElementById('customBuilder').style.display = 'none';
+    document.getElementById('appShell').style.display = 'block';
+    document.body.classList.add('has-app');
+    document.getElementById('settingsProgramName').textContent = prog.name;
+    updateProgSwitchBtn();
+    activeDay = resolveStartupDay();
+    render();
+    renderSettings();
+    cbDayData = []; cbTrainingDays = 4; // reset for next time
+  } catch(e) {
+    showToast('Error saving split');
+    btn.disabled = false; btn.textContent = 'Save Split →';
+  }
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
+function showSetupScreen() {
+  document.getElementById('authScreen').style.display = 'none';
+  document.getElementById('appShell').style.display = 'none';
+  document.getElementById('programSetup').style.display = 'flex';
+  selectTemplate('ppl6');
+}
+
+async function createProgramFromSetup() {
+  const name = document.getElementById('setupProgramName').value.trim() || TEMPLATES[selectedTemplate].name;
+  const tplData = TEMPLATES[selectedTemplate];
+  // Deep clone days so template isn't mutated
+  const days = JSON.parse(JSON.stringify(tplData.days));
+  const btn = document.getElementById('setupStartBtn');
+  btn.disabled = true; btn.textContent = 'Creating…';
+  try {
+    const prog = await api('POST', '/programs', { name, days, template_key: selectedTemplate });
+    activeProgram = prog;
+    allPrograms.unshift(prog);
+    DAYS = prog.days;
+    document.getElementById('programSetup').style.display = 'none';
+    document.getElementById('appShell').style.display = 'block';
+    document.body.classList.add('has-app');
+    document.getElementById('settingsProgramName').textContent = prog.name;
+    updateProgSwitchBtn();
+    activeDay = resolveStartupDay();
+    render();
+    renderSettings();
+  } catch(e) {
+    showToast('❌ ' + e.message);
+  }
+  btn.disabled = false; btn.textContent = 'Start Training →';
+}
+
+function updateProgSwitchBtn() {
+  const btn = document.getElementById('progSwitchBtn');
+  if (btn && activeProgram) btn.textContent = '📋 ' + (activeProgram.name.length > 10 ? activeProgram.name.slice(0,10)+'…' : activeProgram.name);
+}
+
+function openProgModal() {
+  renderProgList();
+  document.getElementById('progModal').classList.add('open');
+}
+function closeProgModal() { document.getElementById('progModal').classList.remove('open'); }
+
+function renderProgList() {
+  const el = document.getElementById('progList');
+  if (!allPrograms.length) { el.innerHTML = '<div style="font-size:13px;color:var(--muted);padding:8px 0">No programs yet.</div>'; return; }
+  el.innerHTML = allPrograms.map(p => `
+    <div class="prog-list-item ${activeProgram&&p.id===activeProgram.id?'active-prog':''}" onclick="switchProgram(${p.id})">
+      <div class="prog-list-item-body">
+        <div class="prog-list-item-name">${p.name}</div>
+        <div class="prog-list-item-sub">${p.days.length} days · ${p.template_key||'custom'}</div>
+      </div>
+      ${activeProgram&&p.id===activeProgram.id?'<span class="prog-active-badge">ACTIVE</span>':''}
+      <button class="prog-del-btn" onclick="event.stopPropagation();deleteProgram(${p.id})">✕</button>
+    </div>`).join('');
+}
+
+async function switchProgram(id) {
+  const prog = allPrograms.find(p => p.id === id);
+  if (!prog) return;
+  activeProgram = prog;
+  DAYS = prog.days;
+  state = {};
+  saveState();
+  closeProgModal();
+  updateProgSwitchBtn();
+  document.getElementById('settingsProgramName').textContent = prog.name;
+  activeDay = resolveStartupDay();
+  render();
+}
+
+async function deleteProgram(id) {
+  if (!confirm('Delete this program?')) return;
+  try { await api('DELETE', '/programs/' + id); } catch(e) {}
+  allPrograms = allPrograms.filter(p => p.id !== id);
+  if (activeProgram && activeProgram.id === id) {
+    activeProgram = allPrograms[0] || null;
+    DAYS = activeProgram ? activeProgram.days : JSON.parse(JSON.stringify(DEFAULT_DAYS));
+    updateProgSwitchBtn();
+    render();
+  }
+  renderProgList();
+}
+
+// ── BOOT ──────────────────────────────────────────────────────────────────────
+async function bootApp() {
+  document.getElementById('authScreen').style.display = 'none';
+  document.getElementById('appShell').style.display = 'block';
+  document.body.classList.add('has-app');
+
+  // Load data from API in parallel
+  try {
+    const [exercises, logs, prsData, programs] = await Promise.all([
+      api('GET', '/exercises'),
+      api('GET', '/logs?limit=100'),
+      api('GET', '/prs'),
+      api('GET', '/programs')
+    ]);
+
+    allExercises = exercises || [];
+    allExercises.forEach(e => { dbCache[e.id] = e; });
+
+    workoutHistory = (logs || []).map(l => ({
+      id: l.id, date: new Date(l.logged_at).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'}),
+      dayLabel: l.day_label, dayType: l.day_type, title: l.day_title, exercises: l.exercises
+    }));
+
+    prs = {};
+    (prsData || []).forEach(p => { prs[p.exercise_name] = { weight: p.weight, display: p.display, date: new Date(p.set_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) }; });
+
+    allPrograms = programs || [];
+
+    if (allPrograms.length > 0) {
+      activeProgram = allPrograms[0];
+      DAYS = activeProgram.days;
+    } else {
+      // No programs — show setup screen
+      document.getElementById('appShell').style.display = 'none';
+      showSetupScreen();
+      return;
+    }
+
+    setSyncStatus(true);
+    // SET-01: load weight unit preference from API
+    try {
+      const prefs = await api('GET', '/auth/preferences');
+      if (prefs && prefs.weight_unit) {
+        weightUnit = prefs.weight_unit;
+        localStorage.setItem('weight_unit', weightUnit);
+      }
+    } catch(e) {} // non-fatal
+  } catch (e) {
+    console.warn('API unavailable, using local state', e);
+    setSyncStatus(false);
+    workoutHistory = JSON.parse(localStorage.getItem('workout_history') || '[]');
+    prs = JSON.parse(localStorage.getItem('workout_prs') || '{}');
+  }
+
+  if (currentUser) {
+    document.getElementById('settingsUsername').textContent = currentUser.username;
+  }
+  if (activeProgram) {
+    document.getElementById('settingsProgramName').textContent = activeProgram.name || 'My Split';
+  }
+  updateProgSwitchBtn();
+  updateStreak();
+  activeDay = resolveStartupDay();
+  render();
+  renderSettings();
+  scrollDayPillIntoView(activeDay);
+}
+
+function bootOffline() {
+  document.getElementById('authScreen').style.display = 'none';
+  document.getElementById('appShell').style.display = 'block';
+  document.body.classList.add('has-app');
+  document.getElementById('offlineBanner').classList.add('show');
+  setSyncStatus(false);
+  workoutHistory = JSON.parse(localStorage.getItem('workout_history') || '[]');
+  prs = JSON.parse(localStorage.getItem('workout_prs') || '{}');
+  updateStreak();
+  activeDay = resolveStartupDay();
+  render();
+  scrollDayPillIntoView(activeDay);
+}
+
+// ── DEFAULT PROGRAM (used if no API program exists) ───────────────────────────
+const DEFAULT_DAYS = [
+  {label:'DAY 1',type:'push',typeName:'Day 1',title:'DAY 1',groups:[]},
+  {label:'DAY 2',type:'pull',typeName:'Day 2',title:'DAY 2',groups:[]},
+  {label:'DAY 3',type:'legs',typeName:'Day 3',title:'DAY 3',groups:[]},
+  {label:'DAY 4',type:'upper',typeName:'Day 4',title:'DAY 4',groups:[]},
+  {label:'DAY 5',type:'lower',typeName:'Day 5',title:'DAY 5',groups:[]},
+  {label:'DAY 6',type:'push',typeName:'Day 6',title:'DAY 6',groups:[]},
+  {label:'REST',type:'rest',typeName:'Rest',title:'REST',groups:[]}
+];
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let DAYS = DEFAULT_DAYS;
+let activeProgram = null;
+let state = JSON.parse(localStorage.getItem('workout_state') || '{}');
+let workoutHistory = [];
+let notes = JSON.parse(localStorage.getItem('workout_notes') || '{}');
+let prs = {};
+let allExercises = [];
+let dbCache = {};
+let activeDay = 0;
+let editMode = false;
+let currentPage = 'workout';
+let editTarget = null;
+let openGroups = {};
+let pickerTarget = null;
+let pickerMode = 'add';
+let pickerExercises = [];
+let pickerFiltered = [];
+let pickerMuscleFilter = 'all';
+let pickerSelected = null;
+let libExercises = [];
+let libMuscleFilter = 'all';
+let libTab = 'mine';
+let communityExercises = [];
+let communityLoaded = false;
+let communityMuscleFilter = 'all';
+let weightUnit = localStorage.getItem('weight_unit') || 'lbs';
+
+const ALL_MUSCLES = ['all','chest','back','shoulders','biceps','triceps','quads','hamstrings','glutes','calves','abs','forearms'];
+
+
+
+
+function getTodayIndex() { const d=new Date().getDay(); return {1:0,2:1,3:2,4:3,5:4,6:5,0:6}[d]; }
+function saveState() { localStorage.setItem('workout_state',JSON.stringify(state)); }
+function saveNotes() { localStorage.setItem('workout_notes',JSON.stringify(notes)); }
+function getDayState(di) { if(!state[di])state[di]={fixed:{},choices:{}}; return state[di]; }
+
+// ── DAY TRACKING SYSTEM ───────────────────────────────────────────────────────
+// dayLog: { programKey: { cycleKey: { dayIndex: 'done'|'skip' } } }
+// cycleKey = sequential cycle count (0 = first run through, 1 = second, etc.)
+// We track position as: which cycle we're on + which day within that cycle
+
+function getDayLogKey() {
+  return (activeProgram ? activeProgram.id : 'default') + '';
+}
+
+function loadDayLog() {
+  return JSON.parse(localStorage.getItem('day_log') || '{}');
+}
+
+function saveDayLog(log) {
+  localStorage.setItem('day_log', JSON.stringify(log));
+}
+
+function getDayTracker() {
+  // Returns {cycle, position} — the current progress pointer
+  return JSON.parse(localStorage.getItem('day_tracker') || '{}');
+}
+
+function saveDayTracker(t) {
+  localStorage.setItem('day_tracker', JSON.stringify(t));
+}
+
+// Get program key for tracker (per-program tracking)
+function getProgKey() {
+  return 'prog_' + (activeProgram ? activeProgram.id : 'default');
+}
+
+// Get tracker for current program
+function getProgTracker() {
+  const all = getDayTracker();
+  const k = getProgKey();
+  if (!all[k]) all[k] = {cycle:0, position:0};
+  return all[k];
+}
+
+function saveProgTracker(t) {
+  const all = getDayTracker();
+  all[getProgKey()] = t;
+  saveDayTracker(all);
+}
+
+// Get the log for the current program/cycle
+function getCycleLog() {
+  const log = loadDayLog();
+  const k = getProgKey();
+  const tracker = getProgTracker();
+  const cycleKey = 'c' + tracker.cycle;
+  if (!log[k]) log[k] = {};
+  if (!log[k][cycleKey]) log[k][cycleKey] = {};
+  return {log, k, cycleKey, entries: log[k][cycleKey]};
+}
+
+// Mark a day with a status ('done' or 'skip')
+function markDayStatus(dayIndex, status) {
+  const {log, k, cycleKey, entries} = getCycleLog();
+  entries[dayIndex] = status;
+  log[k][cycleKey] = entries;
+  saveDayLog(log);
+  // Clear checked boxes for this day so they're fresh next cycle
+  if (state[dayIndex]) { state[dayIndex] = {fixed:{}, choices:{}}; saveState(); }
+}
+
+// Get status of a day in current cycle
+function getDayStatus(dayIndex) {
+  const {entries} = getCycleLog();
+  return entries[dayIndex] || null; // null = pending
+}
+
+// Find the next day that needs to be done (not rest, not done/skip)
+// Returns the day index, or null if all workout days are resolved
+function getNextPendingDay() {
+  // Build list of non-rest days in order starting from tracker position
+  const tracker = getProgTracker();
+  const totalDays = DAYS.length;
+  // Try to find a pending day from current position onward
+  for (let offset = 0; offset < totalDays; offset++) {
+    const i = (tracker.position + offset) % totalDays;
+    const day = DAYS[i];
+    if (day.type === 'rest') continue;
+    const status = getDayStatus(i);
+    if (!status) return i; // found pending workout day
+  }
+  return null; // all days resolved — cycle complete
+}
+
+// Called on app startup to set activeDay to current pending day
+function resolveStartupDay() {
+  const next = getNextPendingDay();
+  if (next !== null) {
+    return next;
+  }
+  // All days done — start a new cycle
+  const tracker = getProgTracker();
+  tracker.cycle += 1;
+  tracker.position = 0;
+  saveProgTracker(tracker);
+  // Reset all checked boxes for the new cycle
+  state = {}; saveState();
+  // Find first non-rest day in new cycle
+  for (let i = 0; i < DAYS.length; i++) {
+    if (DAYS[i].type !== 'rest') return i;
+  }
+  return 0;
+}
+
+// Skip the current day
+function skipDay() {
+  const day = DAYS[activeDay];
+  if (day.type === 'rest') return;
+  markDayStatus(activeDay, 'skip');
+  // Advance tracker position past this day
+  advanceTracker(activeDay);
+  showToast('Day skipped ⏭');
+  // Move to next pending day
+  const next = getNextPendingDay();
+  if (next !== null) {
+    activeDay = next;
+  }
+  render();
+  scrollDayPillIntoView(activeDay);
+}
+
+// Advance tracker position to be after the given day index
+function advanceTracker(dayIndex) {
+  const tracker = getProgTracker();
+  // Move position to dayIndex + 1 (wrapping)
+  tracker.position = (dayIndex + 1) % DAYS.length;
+  saveProgTracker(tracker);
+}
+
+function scrollDayPillIntoView(i) {
+  setTimeout(() => {
+    const pills = document.querySelectorAll('#dayScroll .day-pill');
+    if (pills[i]) pills[i].scrollIntoView({behavior:'smooth', block:'nearest', inline:'center'});
+  }, 100);
+}
+
+// ── RENAME DAY ────────────────────────────────────────────────────────────────
+function openRenameDayModal(di) {
+  const day = DAYS[di];
+  document.getElementById('renameDayInput').value = day.typeName || day.label;
+  document.getElementById('renameDayModal').dataset.di = di;
+  document.getElementById('renameDayModal').classList.add('open');
+  setTimeout(() => document.getElementById('renameDayInput').select(), 200);
+}
+
+function confirmRenameDay() {
+  const modal = document.getElementById('renameDayModal');
+  const di = parseInt(modal.dataset.di);
+  const val = document.getElementById('renameDayInput').value.trim();
+  if (!val) return;
+  DAYS[di].typeName = val;
+  DAYS[di].title = val.toUpperCase();
+  DAYS[di].label = val.length <= 5 ? val.toUpperCase() : val.slice(0,5).toUpperCase();
+  // Persist to API if we have an active program
+  if (activeProgram) {
+    api('PUT', `/programs/${activeProgram.id}`, {name: activeProgram.name||'My Split', days: DAYS, template_key: activeProgram.template_key||null}).catch(()=>{});
+  }
+  closeModal('renameDayModal');
+  render();
+}
+
+function exKey(gi,ei){return gi+'_'+ei;}
+function blockKey(gi,bi){return gi+'_'+bi;}
+function noteKey(di,gi,ei){return di+'_'+gi+'_'+ei;}
+function getDbInfo(id){ return id ? (dbCache[id]||null) : null; }
+
+// ── STREAK ────────────────────────────────────────────────────────────────────
+function calcStreak(){
+  if(!workoutHistory.length)return 0;
+  const dates=[...new Set(workoutHistory.map(h=>h.date))];
+  const today=new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
+  if(dates[0]!==today)return 0;
+  let s=1;
+  for(let i=1;i<dates.length;i++){const d=(new Date(dates[i-1])-new Date(dates[i]))/(864e5);if(d<=2)s++;else break;}
+  return s;
+}
+function updateStreak(){
+  const s=calcStreak();
+  const chip=document.getElementById('streakChip');
+  if(chip){if(s>=2){chip.style.display='flex';document.getElementById('streakCount').textContent=s;}else chip.style.display='none';}
+}
+
+// ── INTERACTIONS ──────────────────────────────────────────────────────────────
+function toggleFixed(di,gi,ei){
+  if(editMode){openEditModal('fixed',di,gi,ei);return;}
+  const s=getDayState(di);const k=exKey(gi,ei);
+  const nowChecked=!s.fixed[k];
+  s.fixed[k]=nowChecked;saveState();render();
+  if(nowChecked){document.getElementById('restTimerFab').classList.add('visible');}
+}
+function toggleChoice(di,gi,bi,oi,isMulti,maxPick){
+  if(editMode){openEditModal('choice',di,gi,bi,oi);return;}
+  const s=getDayState(di);const k=blockKey(gi,bi);
+  if(isMulti){if(!s.choices[k])s.choices[k]=[];const a=s.choices[k];const idx=a.indexOf(oi);if(idx>=0)a.splice(idx,1);else if(a.length<maxPick){a.push(oi);document.getElementById('restTimerFab').classList.add('visible');}}
+  else{const wasSelected=s.choices[k]===oi;s.choices[k]=wasSelected?null:oi;if(!wasSelected)document.getElementById('restTimerFab').classList.add('visible');}
+  saveState();render();
+}
+function toggleGroup(id){openGroups[id]=!openGroups[id];const c=document.getElementById('gc_'+id);if(c)c.classList.toggle('open',openGroups[id]);}
+function saveNote(di,gi,ei,val){const k=noteKey(di,gi,ei);if(val.trim())notes[k]=val.trim();else delete notes[k];saveNotes();}
+function confirmReset(){
+  showConfirm('Reset Day','Clear all progress for today?','Reset',()=>{
+    if(state[activeDay]){state[activeDay]={fixed:{},choices:{}};saveState();}
+    render();
+  },'danger');
+}
+function resetDay(){confirmReset();}
+
+// ── CONFIRM MODAL ─────────────────────────────────────────────────────────────
+let confirmCallback=null;
+function showConfirm(title,body,okLabel,cb,style='danger'){
+  confirmCallback=cb;
+  document.getElementById('confirmTitle').textContent=title;
+  document.getElementById('confirmBody').textContent=body;
+  const btn=document.getElementById('confirmOkBtn');
+  btn.textContent=okLabel;
+  btn.className='confirm-btn '+(style==='danger'?'danger':'primary');
+  document.getElementById('confirmOverlay').classList.add('open');
+}
+function closeConfirm(){document.getElementById('confirmOverlay').classList.remove('open');confirmCallback=null;}
+document.getElementById('confirmOverlay').addEventListener('click',function(e){if(e.target===this)closeConfirm();});
+document.getElementById('confirmOkBtn').addEventListener('click',function(){if(confirmCallback)confirmCallback();closeConfirm();});
+
+// ── TOAST ─────────────────────────────────────────────────────────────────────
+let toastTimer=null;
+function showToast(msg,undoFn=null,duration=4000){
+  const el=document.getElementById('toast');
+  el.innerHTML=msg+(undoFn?`<span class="toast-undo" onclick="toastUndo()">Undo</span>`:'');
+  el._undoFn=undoFn;
+  el.classList.add('show');
+  if(toastTimer)clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>el.classList.remove('show'),duration);
+}
+function toastUndo(){
+  const el=document.getElementById('toast');
+  if(el._undoFn)el._undoFn();
+  el.classList.remove('show');
+}
+
+// ── STREAK (always visible) ───────────────────────────────────────────────────
+function updateStreak(){
+  const s=calcStreak();
+  const chip=document.getElementById('streakChip');
+  if(chip){
+    chip.style.display='flex';
+    document.getElementById('streakCount').textContent=s||'0';
+    chip.classList.toggle('dim',s<2);
+  }
+}
+
+// ── REST TIMER ────────────────────────────────────────────────────────────────
+let restTotal=90,restRemaining=90,restInterval=null,restRunning=false;
+function openRestTimer(){
+  document.getElementById('restTimerSheet').classList.add('open');
+  updateRestDisplay();
+}
+function closeRestTimer(){
+  document.getElementById('restTimerSheet').classList.remove('open');
+}
+function setRestPreset(s){
+  clearInterval(restInterval);restRunning=false;
+  restTotal=s;restRemaining=s;
+  document.querySelectorAll('.rest-preset-btn').forEach(b=>b.classList.toggle('active',+b.dataset.s===s));
+  document.getElementById('restTimerStartBtn').textContent='Start';
+  updateRestDisplay();
+}
+function toggleRestTimer(){
+  if(restRunning){
+    clearInterval(restInterval);restRunning=false;
+    document.getElementById('restTimerStartBtn').textContent='Resume';
+  } else {
+    if(restRemaining<=0){restRemaining=restTotal;}
+    restRunning=true;
+    document.getElementById('restTimerStartBtn').textContent='Pause';
+    restInterval=setInterval(()=>{
+      restRemaining--;
+      updateRestDisplay();
+      if(restRemaining<=0){
+        clearInterval(restInterval);restRunning=false;
+        document.getElementById('restTimerStartBtn').textContent='Restart';
+        document.getElementById('restTimerDisplay').classList.add('urgent');
+        if(navigator.vibrate)navigator.vibrate([200,100,200]);
+        showToast('⏱ Rest complete — get back to it!');
+        closeRestTimer();
+        document.getElementById('restTimerFab').classList.remove('running');
+        document.getElementById('fabTimerDisplay').textContent='⏱';
+      }
+    },1000);
+    document.getElementById('restTimerFab').classList.add('running');
+  }
+}
+function updateRestDisplay(){
+  const m=Math.floor(restRemaining/60),s=restRemaining%60;
+  const str=m+':'+(s<10?'0':'')+s;
+  document.getElementById('restTimerDisplay').textContent=str;
+  document.getElementById('restTimerDisplay').classList.toggle('urgent',restRemaining<=10);
+  if(restRunning)document.getElementById('fabTimerDisplay').textContent=str;
+}
+
+// ── HISTORY FILTER ────────────────────────────────────────────────────────────
+let historyFilter='all';
+function setHistoryFilter(f){
+  historyFilter=f;
+  document.querySelectorAll('#historyFilterChips .filter-chip').forEach(c=>c.classList.toggle('active',c.dataset.filter===f));
+  renderHistory();
+}
+
+// ── STATS RANGE ───────────────────────────────────────────────────────────────
+let statsRange='all';
+function setStatsRange(r){
+  statsRange=r;
+  document.querySelectorAll('.stats-range-tab').forEach(t=>t.classList.toggle('active',t.dataset.range===r));
+  renderStats();
+}
+function getFilteredHistory(){
+  const now=new Date();
+  return workoutHistory.filter(h=>{
+    const d=new Date(h.date);
+    if(statsRange==='week')return(now-d)<=7*864e5;
+    if(statsRange==='month')return(now-d)<=30*864e5;
+    return true;
+  });
+}
+
+// ── UNDO DELETE BUFFER ────────────────────────────────────────────────────────
+let undoBuffer=null;
+function toggleEditMode(){editMode=!editMode;document.getElementById('editModeBtn').classList.toggle('active-mode',editMode);render();}
+function removeExercise(di,gi,ei){
+  const removed=DAYS[di].groups[gi].exs.splice(ei,1)[0];
+  const removedGi=gi;
+  if(DAYS[di].groups[gi]&&DAYS[di].groups[gi].exs.length===0) DAYS[di].groups.splice(gi,1);
+  undoBuffer={type:'fixed',di,gi:removedGi,ei,ex:removed};
+  saveProgToAPI();render();
+  showToast(`Removed "${removed.name}"`,()=>{
+    if(undoBuffer){
+      const g=DAYS[undoBuffer.di].groups[undoBuffer.gi];
+      if(g&&g.exs)g.exs.splice(undoBuffer.ei,0,undoBuffer.ex);
+      else DAYS[undoBuffer.di].groups.splice(undoBuffer.gi,0,{name:removed.name+' — Restored',type:'fixed',exs:[undoBuffer.ex]});
+      undoBuffer=null;saveProgToAPI();render();
+    }
+  });
+}
+function removeChoiceOpt(di,gi,bi,oi){
+  const block=DAYS[di].groups[gi].blocks[bi];
+  const removed=block.opts.splice(oi,1)[0];
+  if(block.opts.length===0) DAYS[di].groups[gi].blocks.splice(bi,1);
+  if(DAYS[di].groups[gi].blocks&&DAYS[di].groups[gi].blocks.length===0) DAYS[di].groups.splice(gi,1);
+  saveProgToAPI();render();
+  showToast(`Removed "${removed.name}"`);
+}
+
+// ── choice swap: open picker then write result back into block.opts[oi] ──────
+let choiceSwapTarget = null;
+function openChoiceSwap(di,gi,bi,oi){
+  choiceSwapTarget={di,gi,bi,oi};
+  const opt=DAYS[di].groups[gi].blocks[bi].opts[oi];
+  pickerMode='choiceSwap';pickerTarget={di,gi,ei:null};pickerSelected=null;pickerMuscleFilter='all';
+  document.getElementById('pickerSearch').value='';document.getElementById('pickerWeight').value=opt.weight||'';
+  document.getElementById('pickerTitle').textContent='SWAP OPTION';
+  document.getElementById('pickerContext').textContent='Replacing: '+opt.name;
+  document.getElementById('pickerConfirmBtn').textContent='Swap Option';
+  const info=getDbInfo(opt.dbId);if(info)pickerMuscleFilter=info.primary_muscle;
+  pickerExercises=allExercises.length>0?allExercises:[];
+  renderPickerTabs();filterPicker();
+  document.getElementById('pickerModal').classList.add('open');
+}
+
+// ── add option to existing choice block ──────────────────────────────────────
+let choiceAddTarget = null;
+function openChoiceAdd(di,gi,bi){
+  choiceAddTarget={di,gi,bi};
+  pickerMode='choiceAdd';pickerTarget={di,gi,ei:null};pickerSelected=null;pickerMuscleFilter='all';
+  document.getElementById('pickerSearch').value='';document.getElementById('pickerWeight').value='';
+  document.getElementById('pickerTitle').textContent='ADD OPTION';
+  document.getElementById('pickerContext').textContent='Adding to: '+DAYS[di].groups[gi].name;
+  document.getElementById('pickerConfirmBtn').textContent='Add Option';
+  pickerExercises=allExercises.length>0?allExercises:[];
+  renderPickerTabs();filterPicker();
+  document.getElementById('pickerModal').classList.add('open');
+}
+
+// ── add a whole new choice block to a choices group ──────────────────────────
+function openChoiceBlockAdd(di,gi){
+  choiceAddTarget={di,gi,bi:null};
+  pickerMode='choiceBlockAdd';pickerTarget={di,gi,ei:null};pickerSelected=null;pickerMuscleFilter='all';
+  document.getElementById('pickerSearch').value='';document.getElementById('pickerWeight').value='';
+  document.getElementById('pickerTitle').textContent='NEW CHOICE BLOCK';
+  document.getElementById('pickerContext').textContent='First option in new block — '+DAYS[di].groups[gi].name;
+  document.getElementById('pickerConfirmBtn').textContent='Create Block';
+  pickerExercises=allExercises.length>0?allExercises:[];
+  renderPickerTabs();filterPicker();
+  document.getElementById('pickerModal').classList.add('open');
+}
+
+// ── add a new group below gi ──────────────────────────────────────────────────
+function addNewGroup(di,gi,type){
+  const name=type==='choices'?'New Choice Group':'New Exercise Group';
+  const newGroup=type==='choices'
+    ?{name,type:'choices',blocks:[{label:'Pick 1',opts:[]}]}
+    :{name,type:'fixed',exs:[]};
+  DAYS[di].groups.splice(gi+1,0,newGroup);
+  saveProgToAPI();render();
+  // Auto-open picker for fixed so user immediately adds an exercise
+  if(type==='fixed') setTimeout(()=>openPicker(di,gi+1,'add'),150);
+}
+
+// ── remove an entire group ────────────────────────────────────────────────────
+function removeGroup(di,gi){
+  const removed=DAYS[di].groups.splice(gi,1)[0];
+  saveProgToAPI();render();
+  showToast(`Removed group "${removed.name}"`);
+}
+function reorderExercise(di,gi,ei,dir){
+  const exs=DAYS[di].groups[gi].exs;
+  const ni=ei+dir;
+  if(ni<0||ni>=exs.length)return;
+  [exs[ei],exs[ni]]=[exs[ni],exs[ei]];
+  saveProgToAPI();render();
+}
+
+// ── EDIT MODAL ────────────────────────────────────────────────────────────────
+function openEditModal(type,di,gi,eiOrBi,oi){
+  editTarget={type,di,gi};let name='',weight='',title='';
+  if(type==='fixed'){editTarget.ei=eiOrBi;const ex=DAYS[di].groups[gi].exs[eiOrBi];name=ex.name;weight=ex.weight;title='EDIT EXERCISE';}
+  else{editTarget.bi=eiOrBi;editTarget.oi=oi;const opt=DAYS[di].groups[gi].blocks[eiOrBi].opts[oi];name=opt.name;weight=opt.weight;title='EDIT OPTION';}
+  document.getElementById('editModalTitle').textContent=title;
+  document.getElementById('editName').value=name;
+  document.getElementById('editWeight').value=weight;
+  document.getElementById('editModal').classList.add('open');
+  setTimeout(()=>document.getElementById('editName').focus(),300);
+}
+function saveEdit(){
+  if(!editTarget)return;
+  const name=document.getElementById('editName').value.trim();const weight=document.getElementById('editWeight').value.trim();if(!name)return;
+  const{type,di,gi}=editTarget;
+  if(type==='fixed'){DAYS[di].groups[gi].exs[editTarget.ei].name=name;DAYS[di].groups[gi].exs[editTarget.ei].weight=weight;}
+  else{DAYS[di].groups[gi].blocks[editTarget.bi].opts[editTarget.oi].name=name;DAYS[di].groups[gi].blocks[editTarget.bi].opts[editTarget.oi].weight=weight;}
+  saveProgToAPI();closeModal('editModal');render();
+}
+document.getElementById('editModal').addEventListener('click',function(e){if(e.target===this)closeModal('editModal');});
+
+// ── GROUP SETTINGS MODAL ──────────────────────────────────────────────────────
+let gsTarget = null;
+function openGroupSettings(di, gi) {
+  const group = DAYS[di].groups[gi];
+  gsTarget = { di, gi };
+  document.getElementById('gsGroupName').value = group.name || '';
+  const isChoices = group.type === 'choices';
+  document.getElementById('gsPickLabel').style.display = isChoices ? '' : 'none';
+  const row = document.getElementById('gsPickCountRow');
+  row.style.display = isChoices ? '' : 'none';
+  document.getElementById('gsMultiNote').style.display = isChoices ? '' : 'none';
+
+  // Inject group type toggle if not already there
+  let typeRow = document.getElementById('gsTypeRow');
+  if (!typeRow) {
+    typeRow = document.createElement('div');
+    typeRow.id = 'gsTypeRow';
+    typeRow.style.cssText = 'display:flex;gap:8px;margin-bottom:14px';
+    const label = document.createElement('div');
+    label.className = 'modal-label';
+    label.textContent = 'Group Type';
+    label.style.marginBottom = '6px';
+    const nameInput = document.getElementById('gsGroupName').parentNode || document.getElementById('gsGroupName');
+    document.getElementById('gsGroupName').insertAdjacentElement('afterend', label);
+    label.insertAdjacentElement('afterend', typeRow);
+  }
+  typeRow.innerHTML = `
+    <button id="gsTypeFixed" onclick="gsSetType('fixed')" style="flex:1;padding:9px;border-radius:10px;border:2px solid ${!isChoices?'var(--check)':'var(--border)'};background:${!isChoices?'rgba(78,203,127,.1)':'var(--surface2)'};color:${!isChoices?'var(--check)':'var(--muted)'};font-weight:700;font-size:13px;cursor:pointer">Fixed List</button>
+    <button id="gsTypeChoices" onclick="gsSetType('choices')" style="flex:1;padding:9px;border-radius:10px;border:2px solid ${isChoices?'var(--check)':'var(--border)'};background:${isChoices?'rgba(78,203,127,.1)':'var(--surface2)'};color:${isChoices?'var(--check)':'var(--muted)'};font-weight:700;font-size:13px;cursor:pointer">Choose N</button>
+  `;
+
+  if (isChoices) {
+    const totalOpts = (group.blocks || []).reduce((a, b) => a + (b.opts || []).length, 0);
+    const currentMulti = (group.blocks && group.blocks[0] && group.blocks[0].multi) ? group.blocks[0].multi : 1;
+    const maxShow = Math.max(totalOpts, 5);
+    row.innerHTML = '';
+    for (let n = 1; n <= maxShow; n++) {
+      const btn = document.createElement('button');
+      btn.className = 'pick-count-btn' + (n === currentMulti ? ' active' : '');
+      btn.textContent = n;
+      btn.onclick = () => { row.querySelectorAll('.pick-count-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); updateGsNote(n, totalOpts); };
+      row.appendChild(btn);
+    }
+    updateGsNote(currentMulti, totalOpts);
+  }
+  document.getElementById('groupSettingsModal').classList.add('open');
+  setTimeout(() => document.getElementById('gsGroupName').focus(), 300);
+}
+
+function gsSetType(type) {
+  if (!gsTarget) return;
+  const group = DAYS[gsTarget.di].groups[gsTarget.gi];
+  const isChoices = type === 'choices';
+  // Convert group type
+  if (type === 'choices' && group.type === 'fixed') {
+    // Convert fixed→choices: wrap existing exercises as opts in one block
+    const opts = (group.exs || []).map(ex => ({name:ex.name, weight:ex.weight||'', dbId:ex.dbId||''}));
+    group.type = 'choices';
+    group.blocks = [{label:'Pick 1', opts}];
+    delete group.exs;
+  } else if (type === 'fixed' && group.type === 'choices') {
+    // Convert choices→fixed: flatten all opts into exs
+    const exs = (group.blocks || []).flatMap(b => (b.opts||[]).map(o => ({name:o.name,weight:o.weight||'',dbId:o.dbId||''})));
+    group.type = 'fixed';
+    group.exs = exs;
+    delete group.blocks;
+  }
+  document.getElementById('gsPickLabel').style.display = isChoices ? '' : 'none';
+  document.getElementById('gsPickCountRow').style.display = isChoices ? '' : 'none';
+  document.getElementById('gsMultiNote').style.display = isChoices ? '' : 'none';
+  document.getElementById('gsTypeFixed').style.cssText = `flex:1;padding:9px;border-radius:10px;border:2px solid ${!isChoices?'var(--check)':'var(--border)'};background:${!isChoices?'rgba(78,203,127,.1)':'var(--surface2)'};color:${!isChoices?'var(--check)':'var(--muted)'};font-weight:700;font-size:13px;cursor:pointer`;
+  document.getElementById('gsTypeChoices').style.cssText = `flex:1;padding:9px;border-radius:10px;border:2px solid ${isChoices?'var(--check)':'var(--border)'};background:${isChoices?'rgba(78,203,127,.1)':'var(--surface2)'};color:${isChoices?'var(--check)':'var(--muted)'};font-weight:700;font-size:13px;cursor:pointer`;
+  if (isChoices) {
+    const totalOpts = (group.blocks || []).reduce((a, b) => a + (b.opts || []).length, 0);
+    const row = document.getElementById('gsPickCountRow');
+    row.innerHTML = '';
+    for (let n = 1; n <= Math.max(totalOpts, 5); n++) {
+      const btn = document.createElement('button');
+      btn.className = 'pick-count-btn' + (n === 1 ? ' active' : '');
+      btn.textContent = n;
+      btn.onclick = () => { row.querySelectorAll('.pick-count-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); updateGsNote(n, totalOpts); };
+      row.appendChild(btn);
+    }
+    updateGsNote(1, totalOpts);
+  }
+}
+function updateGsNote(n, total) {
+  const el = document.getElementById('gsMultiNote');
+  if (n === 1) el.textContent = 'User picks exactly 1 option (radio select).';
+  else if (n >= total) el.textContent = `User must pick all ${total} options.`;
+  else el.textContent = `User picks any ${n} of the ${total} options.`;
+}
+function saveGroupSettings() {
+  if (!gsTarget) return;
+  const { di, gi } = gsTarget;
+  const group = DAYS[di].groups[gi];
+  const name = document.getElementById('gsGroupName').value.trim();
+  if (name) group.name = name;
+  if (group.type === 'choices') {
+    const activeBtn = document.querySelector('#gsPickCountRow .pick-count-btn.active');
+    if (activeBtn) {
+      const n = parseInt(activeBtn.textContent);
+      (group.blocks || []).forEach(b => { if (n === 1) delete b.multi; else b.multi = n; });
+    }
+  }
+  saveProgToAPI(); closeModal('groupSettingsModal'); render();
+}
+document.addEventListener('click', function(e) { if (e.target === document.getElementById('groupSettingsModal')) closeModal('groupSettingsModal'); });
+
+// ── SAVE PROGRAM TO API ───────────────────────────────────────────────────────
+async function saveProgToAPI(){
+  if(offlineMode||!activeProgram)return;
+  try {
+    await api('PUT',`/programs/${activeProgram.id}`,{name:activeProgram.name||'My Split',days:DAYS,template_key:activeProgram.template_key||null});
+    setSyncStatus(true);
+  } catch(e){ setSyncStatus(false); }
+}
+
+// ── PICKER ────────────────────────────────────────────────────────────────────
+async function openPicker(di,gi,mode='add',ei=null){
+  pickerMode=mode;pickerTarget={di,gi,ei};pickerSelected=null;pickerMuscleFilter='all';
+  document.getElementById('pickerSearch').value='';document.getElementById('pickerWeight').value='';
+  const day=DAYS[di];const group=day.groups[gi];
+  if(mode==='swap'){
+    const ex=group.exs[ei];
+    document.getElementById('pickerTitle').textContent='SWAP EXERCISE';
+    document.getElementById('pickerContext').textContent='Replacing: '+ex.name;
+    document.getElementById('pickerConfirmBtn').textContent='Swap Exercise';
+    document.getElementById('pickerWeight').value=ex.weight||'';
+    const info=getDbInfo(ex.dbId);if(info)pickerMuscleFilter=info.primary_muscle;
+  } else {
+    document.getElementById('pickerTitle').textContent='ADD EXERCISE';
+    document.getElementById('pickerContext').textContent='Adding to: '+group.name+' on '+day.label;
+    document.getElementById('pickerConfirmBtn').textContent='Add to Workout';
+  }
+  pickerExercises=allExercises.length>0?allExercises:(await api('GET','/exercises')||[]);
+  pickerExercises.forEach(e=>{dbCache[e.id]=e;});
+  renderPickerTabs();filterPicker();
+  document.getElementById('pickerModal').classList.add('open');
+}
+function renderPickerTabs(){document.getElementById('pickerTabs').innerHTML=ALL_MUSCLES.map(m=>`<div class="picker-tab ${m===pickerMuscleFilter?'active':''}" onclick="setPickerMuscle('${m}')">${m.charAt(0).toUpperCase()+m.slice(1)}</div>`).join('');}
+function setPickerMuscle(m){pickerMuscleFilter=m;pickerSelected=null;renderPickerTabs();filterPicker();}
+function filterPicker(){
+  const q=document.getElementById('pickerSearch').value.toLowerCase();
+  pickerFiltered=pickerExercises.filter(ex=>{
+    const mm=pickerMuscleFilter==='all'||ex.primary_muscle===pickerMuscleFilter||(ex.secondary_muscles||[]).includes(pickerMuscleFilter);
+    const ms=!q||ex.name.toLowerCase().includes(q)||ex.primary_muscle.includes(q);
+    return mm&&ms;
+  });
+  renderPickerResults();
+}
+function renderPickerResults(){
+  const el=document.getElementById('pickerResults');
+  if(!pickerFiltered.length){el.innerHTML=`<div class="picker-none">No exercises.<br><span style="color:var(--upper);cursor:pointer" onclick="closeModal('pickerModal');openCreateModal()">+ Create custom</span></div>`;return;}
+  el.innerHTML=pickerFiltered.map(ex=>{const sel=pickerSelected===ex.id;const sec=(ex.secondary_muscles||[]).slice(0,2).join(', ');return`<div class="picker-item ${sel?'selected':''}" onclick="selectPickerItem('${ex.id}')"><div class="picker-item-radio"><div class="picker-item-radio-dot"></div></div><div class="picker-item-info"><div class="picker-item-name">${ex.name}</div><div class="picker-item-meta">${ex.primary_muscle}${sec?' · '+sec:''} · ${ex.equipment}</div></div></div>`;}).join('')+`<div style="padding:10px 0;text-align:center"><span style="font-size:12px;color:var(--upper);cursor:pointer" onclick="closeModal('pickerModal');openCreateModal()">+ Create custom exercise</span></div>`;
+}
+function selectPickerItem(id){pickerSelected=pickerSelected===id?null:id;renderPickerResults();}
+function confirmPick(){
+  if(!pickerSelected){showToast('Select an exercise first');return;}
+  const ex=pickerExercises.find(e=>e.id===pickerSelected);if(!ex)return;
+  const weight=document.getElementById('pickerWeight').value.trim()||'';
+  const{di,gi,ei}=pickerTarget;const group=DAYS[di].groups[gi];
+
+  if(pickerMode==='choiceSwap'&&choiceSwapTarget){
+    const{bi,oi}=choiceSwapTarget;
+    group.blocks[bi].opts[oi]={name:ex.name,weight,dbId:ex.id};
+    choiceSwapTarget=null;
+  } else if(pickerMode==='choiceAdd'&&choiceAddTarget){
+    const{bi}=choiceAddTarget;
+    group.blocks[bi].opts.push({name:ex.name,weight,dbId:ex.id});
+    choiceAddTarget=null;
+  } else if(pickerMode==='choiceBlockAdd'&&choiceAddTarget){
+    const newBlock={label:'Pick 1',opts:[{name:ex.name,weight,dbId:ex.id}]};
+    group.blocks.push(newBlock);
+    choiceAddTarget=null;
+  } else if(pickerMode==='swap'){
+    group.exs[ei]={name:ex.name,weight:weight||'add weight',dbId:ex.id};
+  } else {
+    if(!group.exs)group.exs=[];
+    group.exs.push({name:ex.name,weight:weight||'add weight',dbId:ex.id});
+  }
+  saveProgToAPI();closeModal('pickerModal');openGroups={};render();
+}
+document.getElementById('pickerModal').addEventListener('click',function(e){if(e.target===this)closeModal('pickerModal');});
+
+// ── CREATE CUSTOM EXERCISE ─────────────────────────────────────────────────────
+function openCreateModal(){document.getElementById('createName').value='';document.getElementById('createModal').classList.add('open');setTimeout(()=>document.getElementById('createName').focus(),300);}
+async function saveCustomExercise(){
+  const name=document.getElementById('createName').value.trim();if(!name){showToast('Enter a name');return;}
+  const body={name,primary_muscle:document.getElementById('createMuscle').value,secondary_muscles:[],category:document.getElementById('createCat').value,equipment:document.getElementById('createEquip').value};
+  try{
+    const ex=await api('POST','/exercises',body);
+    if(ex){allExercises.push(ex);dbCache[ex.id]=ex;}
+    closeModal('createModal');
+    if(currentPage==='library')loadLibrary();
+    if(pickerTarget){pickerExercises=allExercises;if(ex)pickerSelected=ex.id;filterPicker();document.getElementById('pickerModal').classList.add('open');}
+  }catch(e){showToast('❌ '+e.message);}
+}
+document.getElementById('createModal').addEventListener('click',function(e){if(e.target===this)closeModal('createModal');});
+document.getElementById('logEditorModal').addEventListener('click',function(e){if(e.target===this)closeModal('logEditorModal');});
+
+// ── SAVE WORKOUT ──────────────────────────────────────────────────────────────
+async function saveWorkout(){
+  const day=DAYS[activeDay];const s=getDayState(activeDay);const exercises=[];let newPRs=[];
+  day.groups.forEach((g,gi)=>{
+    if(g.type==='fixed'){
+      g.exs.forEach((ex,ei)=>{
+        if(s.fixed[exKey(gi,ei)]){
+          const note=notes[noteKey(activeDay,gi,ei)]||'';
+          const isPR=trySetPR(ex.name,note||ex.weight);
+          if(isPR)newPRs.push(ex.name);
+          exercises.push({name:ex.name,weight:ex.weight,note,isPR});
+        }
+      });
+    } else {
+      g.blocks.forEach((b,bi)=>{const k=blockKey(gi,bi);const sel=s.choices[k];if(b.multi)(sel||[]).forEach(oi=>{const cn=notes[noteKey(activeDay,gi,bi*1000+oi)]||'';const isPR=trySetPR(b.opts[oi].name,b.opts[oi].weight);if(isPR)newPRs.push(b.opts[oi].name);exercises.push({name:b.opts[oi].name,weight:b.opts[oi].weight,note:cn,isPR});});else if(sel!=null){const cn=notes[noteKey(activeDay,gi,bi*1000+sel)]||'';const isPR=trySetPR(b.opts[sel].name,b.opts[sel].weight);if(isPR)newPRs.push(b.opts[sel].name);exercises.push({name:b.opts[sel].name,weight:b.opts[sel].weight,note:cn,isPR});}});
+    }
+  });
+  if(!exercises.length){showToast('Check off some exercises first!');return;}
+
+  const logBody={program_id:activeProgram?.id||null,day_label:day.label,day_type:day.type,day_title:day.title,exercises};
+  try{
+    const log=await api('POST','/logs',logBody);
+    if(log){workoutHistory.unshift({id:log.id,date:new Date(log.logged_at).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'}),dayLabel:day.label,dayType:day.type,title:day.title,exercises});}
+    // Save PRs to API
+    for(const name of newPRs){const pr=prs[name];if(pr)await api('POST','/prs',{exercise_name:name,weight:pr.weight,display:pr.display}).catch(()=>{});}
+    setSyncStatus(true);
+  }catch(e){
+    // Save locally as fallback
+    workoutHistory.unshift({id:Date.now(),date:new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'}),dayLabel:day.label,dayType:day.type,title:day.title,exercises});
+    localStorage.setItem('workout_history',JSON.stringify(history));
+    setSyncStatus(false);
+  }
+  updateStreak();
+  markDayStatus(activeDay, 'done');
+  advanceTracker(activeDay);
+  const prMsg=newPRs.length>0?'\n\nNew PRs: '+newPRs.join(', ')+' 🏆':'';
+  showToast('Workout saved! 💪'+(newPRs.length?' 🏆 '+newPRs.length+' new PR!':''));
+  goPage('history');
+}
+
+function trySetPR(name,weightStr){
+  if(!weightStr||weightStr==='add weight'||weightStr==='light')return false;
+  // TECH-02: normalize — extract all numbers, take the largest as the weight value
+  const nums=weightStr.match(/[\d.]+/g);if(!nums)return false;
+  const val=Math.max(...nums.map(Number));if(!val)return false;
+  const existing=prs[name];
+  const today=new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  if(!existing||val>existing.weight){prs[name]={weight:val,date:today,display:weightStr};localStorage.setItem('workout_prs',JSON.stringify(prs));return true;}
+  return false;
+}
+
+// ── HISTORY EDIT MODE ─────────────────────────────────────────────────────────
+let historyEditMode = false;
+let logEditorTarget = null; // { index } into workoutHistory
+let logEditorExercises = []; // working copy of exercises being edited
+
+function toggleHistoryEditMode() {
+  historyEditMode = !historyEditMode;
+  renderHistory();
+}
+
+function openLogEditor(entryId) {
+  const idx = workoutHistory.findIndex(h => h.id === entryId);
+  if (idx < 0) return;
+  logEditorTarget = { id: entryId, idx };
+  const entry = workoutHistory[idx];
+  // Set date input — parse the stored display date back to YYYY-MM-DD
+  const d = new Date(entry.date);
+  const iso = isNaN(d) ? '' : d.toISOString().slice(0, 10);
+  document.getElementById('logEditorDate').value = iso;
+  // Set type
+  document.getElementById('logEditorType').value = entry.dayType || 'push';
+  // Deep-copy exercises
+  logEditorExercises = (entry.exercises || []).map(ex => ({ ...ex }));
+  renderLogEditorExList();
+  document.getElementById('logEditorTitle').textContent = 'EDIT — ' + (entry.title || entry.dayLabel);
+  document.getElementById('logEditorModal').classList.add('open');
+}
+
+function renderLogEditorExList() {
+  const el = document.getElementById('logEditorExList');
+  if (!logEditorExercises.length) {
+    el.innerHTML = '<div style="font-size:13px;color:var(--muted);padding:8px 0 4px">No exercises. Add one below.</div>';
+    return;
+  }
+  el.innerHTML = logEditorExercises.map((ex, i) => `
+    <div class="log-ex-editor">
+      <div class="log-ex-row">
+        <input class="log-ex-name-input" placeholder="Exercise name" value="${(ex.name||'').replace(/"/g,'&quot;')}" oninput="logEditorExercises[${i}].name=this.value">
+        <button class="log-ex-del" onclick="logEditorRemoveEx(${i})" title="Remove">✕</button>
+      </div>
+      <div class="log-ex-row">
+        <input class="log-ex-weight-input" placeholder="Weight × reps" value="${(ex.weight||'').replace(/"/g,'&quot;')}" oninput="logEditorExercises[${i}].weight=this.value">
+        <input class="log-ex-name-input" placeholder="Note (optional)" style="font-size:12px" value="${(ex.note||'').replace(/"/g,'&quot;')}" oninput="logEditorExercises[${i}].note=this.value">
+      </div>
+    </div>`).join('');
+}
+
+function logEditorAddEx() {
+  logEditorExercises.push({ name: '', weight: '', note: '', isPR: false });
+  renderLogEditorExList();
+  // Focus the last name input
+  setTimeout(() => {
+    const inputs = document.querySelectorAll('#logEditorExList .log-ex-name-input');
+    if (inputs.length) inputs[inputs.length - 2].focus(); // -2 = last name field (pairs of 2 per ex)
+  }, 50);
+}
+
+function logEditorRemoveEx(i) {
+  logEditorExercises.splice(i, 1);
+  renderLogEditorExList();
+}
+
+async function saveLogEdit() {
+  if (!logEditorTarget) return;
+  const dateVal = document.getElementById('logEditorDate').value;
+  const typeVal = document.getElementById('logEditorType').value;
+  const exs = logEditorExercises.filter(ex => ex.name.trim());
+  if (!exs.length) { showToast('Add at least one exercise'); return; }
+  // Format date back to display string
+  const displayDate = dateVal
+    ? new Date(dateVal + 'T12:00:00').toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric', year:'numeric' })
+    : workoutHistory[logEditorTarget.idx].date;
+  const typeNames = { push:'Push', pull:'Pull', legs:'Legs', upper:'Upper', lower:'Lower', rest:'Rest' };
+  const entry = workoutHistory[logEditorTarget.idx];
+  const updated = {
+    ...entry,
+    date: displayDate,
+    dayType: typeVal,
+    title: typeNames[typeVal] || entry.title,
+    exercises: exs
+  };
+  // Try to sync: delete old + re-post new (API has no PATCH for logs)
+  try {
+    await api('DELETE', '/logs/' + entry.id).catch(() => {});
+    const body = {
+      program_id: activeProgram?.id || null,
+      day_label: updated.dayLabel || updated.title,
+      day_type: updated.dayType,
+      day_title: updated.title,
+      exercises: updated.exercises
+    };
+    const newLog = await api('POST', '/logs', body);
+    if (newLog) updated.id = newLog.id;
+    setSyncStatus(true);
+  } catch(e) { setSyncStatus(false); }
+  workoutHistory[logEditorTarget.idx] = updated;
+  // Re-sort by date descending
+  workoutHistory.sort((a, b) => new Date(b.date) - new Date(a.date));
+  closeModal('logEditorModal');
+  renderHistory();
+  updateStreak();
+  showToast('Session updated ✓');
+}
+
+// Add a blank manual log entry
+async function addManualLog() {
+  const today = new Date().toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric', year:'numeric' });
+  const blank = { id: Date.now(), date: today, dayLabel: 'Manual', dayType: 'push', title: 'Push', exercises: [] };
+  workoutHistory.unshift(blank);
+  // Open editor immediately on the new entry
+  renderHistory();
+  setTimeout(() => openLogEditor(blank.id), 80);
+}
+
+async function deleteHistory(id) {
+  const entry = workoutHistory.find(h => h.id === id);
+  if (!entry) return;
+  showConfirm('Delete Session', `Delete "${entry.title}" on ${entry.date}?`, 'Delete', async () => {
+    try { await api('DELETE', '/logs/' + id); } catch(e) {}
+    workoutHistory = workoutHistory.filter(h => h.id !== id);
+    renderHistory();
+    updateStreak();
+    showToast('Session deleted');
+  }, 'danger');
+}
+
+async function loadLibrary(){
+  try{libExercises=await api('GET','/exercises')||[];libExercises.forEach(e=>{dbCache[e.id]=e;});}
+  catch(e){libExercises=allExercises;}
+  renderLibMuscleTabs();filterLibrary();
+  // Reset community pane tab state on fresh load
+  setLibTab(libTab);
+}
+
+function setLibTab(tab){
+  libTab=tab;
+  const mine=document.getElementById('libPaneMine');
+  const comm=document.getElementById('libPaneCommunity');
+  const btnMine=document.getElementById('libTabMine');
+  const btnComm=document.getElementById('libTabCommunity');
+  if(!mine||!comm)return;
+  mine.style.display=tab==='mine'?'block':'none';
+  comm.style.display=tab==='community'?'block':'none';
+  if(btnMine){btnMine.style.background=tab==='mine'?'var(--surface3)':'none';btnMine.style.color=tab==='mine'?'var(--text)':'var(--muted)';}
+  if(btnComm){btnComm.style.background=tab==='community'?'var(--surface3)':'none';btnComm.style.color=tab==='community'?'var(--text)':'var(--muted)';}
+  if(tab==='community'&&!communityLoaded)loadCommunity();
+}
+
+function renderLibMuscleTabs(){document.getElementById('libMuscleTabs').innerHTML=ALL_MUSCLES.map(m=>`<div class="muscle-tab ${m===libMuscleFilter?'active':''}" onclick="setLibMuscle('${m}')">${m.charAt(0).toUpperCase()+m.slice(1)}</div>`).join('');}
+function setLibMuscle(m){libMuscleFilter=m;renderLibMuscleTabs();filterLibrary();}
+function filterLibrary(){
+  const q=(document.getElementById('libSearch')?.value||'').toLowerCase();
+  const filtered=libExercises.filter(ex=>{const mm=libMuscleFilter==='all'||ex.primary_muscle===libMuscleFilter||(ex.secondary_muscles||[]).includes(libMuscleFilter);const ms=!q||ex.name.toLowerCase().includes(q)||ex.primary_muscle.includes(q);return mm&&ms;});
+  const el=document.getElementById('libList');
+  if(!filtered.length){el.innerHTML=`<div class="library-empty">No exercises. <span style="color:var(--upper);cursor:pointer" onclick="openCreateModal()">+ Create one</span></div>`;return;}
+  el.innerHTML=filtered.map(ex=>{const sec=(ex.secondary_muscles||[]).slice(0,2).join(', ');return`<div class="library-ex-item"><div class="library-ex-left"><div class="library-ex-name">${ex.name}</div><div class="library-ex-meta"><span class="lib-tag muscle">${ex.primary_muscle}</span><span class="lib-tag equip">${ex.equipment}</span><span class="lib-tag cat">${ex.category}</span>${ex.is_custom?'<span class="lib-tag custom">custom</span>':''}${sec?`<span class="lib-tag" style="background:var(--surface3);color:var(--muted)">${sec}</span>`:''}</div></div>${ex.is_custom?`<button style="background:none;border:none;color:var(--danger);font-size:12px;cursor:pointer;padding:4px 8px" onclick="removeCustomLib('${ex.id}')">✕</button>`:''}</div>`;}).join('')+`<div style="padding:16px;text-align:center"><span style="font-size:13px;color:var(--upper);cursor:pointer" onclick="openCreateModal()">+ Add Custom Exercise</span></div>`;
+}
+async function removeCustomLib(id){
+  showConfirm('Remove Exercise','Remove this custom exercise?','Remove',async()=>{
+    await api('DELETE','/exercises/'+id).catch(()=>{});
+    libExercises=libExercises.filter(e=>e.id!==id);filterLibrary();
+  },'danger');
+}
+
+// ── COMMUNITY LIBRARY (COM-03) ────────────────────────────────────────────────
+async function loadCommunity(){
+  const el=document.getElementById('communityList');
+  if(el)el.innerHTML=`<div class="library-empty">Loading…</div>`;
+  try{
+    communityExercises=await api('GET','/shared-exercises?status=approved')||[];
+    communityLoaded=true;
+  } catch(e){
+    // API not yet implemented — show instructional placeholder
+    communityExercises=[];
+    communityLoaded=true;
+    if(el)el.innerHTML=`<div class="library-empty" style="padding:32px 20px"><div style="font-size:32px;margin-bottom:12px">🌐</div><div style="font-size:14px;margin-bottom:8px;color:var(--text)">Community Library</div><div style="font-size:13px;color:var(--muted);line-height:1.6">Community exercises require the shared_exercises backend (COM-01/02).<br><br>Once deployed, approved exercises from all users appear here.</div></div>`;
+    renderCommunityMuscleTabs();
+    return;
+  }
+  renderCommunityMuscleTabs();
+  filterCommunity();
+}
+function renderCommunityMuscleTabs(){
+  const el=document.getElementById('communityMuscleTabs');
+  if(el)el.innerHTML=ALL_MUSCLES.map(m=>`<div class="muscle-tab ${m===communityMuscleFilter?'active':''}" onclick="setCommunityMuscle('${m}')">${m.charAt(0).toUpperCase()+m.slice(1)}</div>`).join('');
+}
+function setCommunityMuscle(m){communityMuscleFilter=m;renderCommunityMuscleTabs();filterCommunity();}
+function filterCommunity(){
+  const q=(document.getElementById('communitySearch')?.value||'').toLowerCase();
+  const el=document.getElementById('communityList');if(!el)return;
+  const filtered=communityExercises.filter(ex=>{
+    const mm=communityMuscleFilter==='all'||ex.primary_muscle===communityMuscleFilter;
+    const ms=!q||ex.name.toLowerCase().includes(q)||ex.primary_muscle.includes(q);
+    return mm&&ms;
+  });
+  if(!filtered.length){el.innerHTML=`<div class="library-empty">No community exercises yet. Be the first to submit one!</div>`;return;}
+  el.innerHTML=filtered.map(ex=>{
+    const sec=(ex.secondary_muscles||[]).slice(0,2).join(', ');
+    const uses=ex.use_count?`<span class="community-use-count">👥 ${ex.use_count}</span>`:'';
+    return`<div class="library-ex-item"><div class="library-ex-left"><div class="library-ex-name">${ex.name} <span class="community-badge">community</span></div><div class="library-ex-meta"><span class="lib-tag muscle">${ex.primary_muscle}</span><span class="lib-tag equip">${ex.equipment}</span><span class="lib-tag cat">${ex.category}</span>${sec?`<span class="lib-tag" style="background:var(--surface3);color:var(--muted)">${sec}</span>`:''}</div>${uses}</div><button style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--check);font-size:11px;font-weight:600;padding:6px 10px;cursor:pointer;white-space:nowrap" onclick="addCommunityToProgram('${ex.id}','${ex.name.replace(/'/g,"\\'")}','${ex.primary_muscle}','${ex.equipment}')">+ Add</button></div>`;
+  }).join('');
+}
+async function addCommunityToProgram(id,name,muscle,equip){
+  // Increment use count on backend (best-effort)
+  api('POST',`/shared-exercises/${id}/use`).catch(()=>{});
+  // Add to allExercises cache so picker can find it
+  if(!dbCache[id]){
+    const ex={id,name,primary_muscle:muscle,equipment:equip,secondary_muscles:[],category:'compound',is_custom:false};
+    allExercises.push(ex);dbCache[id]=ex;
+  }
+  showToast(`"${name}" added — go to Workout to place it`);
+}
+function openSubmitCommunityModal(){
+  document.getElementById('commName').value='';
+  document.getElementById('commNotes').value='';
+  document.getElementById('communitySubmitModal').classList.add('open');
+  setTimeout(()=>document.getElementById('commName').focus(),300);
+}
+async function submitCommunityExercise(){
+  const name=document.getElementById('commName').value.trim();
+  if(!name){showToast('Enter a name');return;}
+  const body={
+    name,
+    primary_muscle:document.getElementById('commMuscle').value,
+    secondary_muscles:[],
+    equipment:document.getElementById('commEquip').value,
+    category:document.getElementById('commCat').value,
+    description:document.getElementById('commNotes').value.trim()||null
+  };
+  try{
+    await api('POST','/shared-exercises',body);
+    closeModal('communitySubmitModal');
+    showToast('Submitted for review! ✓');
+  } catch(e){
+    showToast('❌ '+(e.message||'Submit failed — backend not yet deployed'));
+    closeModal('communitySubmitModal');
+  }
+}
+document.getElementById('communitySubmitModal').addEventListener('click',function(e){if(e.target===this)closeModal('communitySubmitModal');});
+document.getElementById('renameDayModal').addEventListener('click',function(e){if(e.target===this)closeModal('renameDayModal');});
+
+// ── WEIGHT UNIT (SET-01) ──────────────────────────────────────────────────────
+function setWeightUnit(u){
+  weightUnit=u;
+  localStorage.setItem('weight_unit',u);
+  // Sync to backend (SET-01) — best-effort
+  api('PUT','/auth/preferences',{weight_unit:u}).catch(()=>{});
+  renderSettings();
+  render(); // update set input placeholders
+}
+
+// ── SETTINGS RENDER ───────────────────────────────────────────────────────────
+function countProgress(di){
+  const day=DAYS[di];if(day.type==='rest')return{done:0,total:0};
+  const s=getDayState(di);let done=0,total=0;
+  day.groups.forEach((g,gi)=>{
+    if(g.type==='fixed'){
+      g.exs.forEach((_,ei)=>{
+        total++;
+        // count done if at least one set is checked
+        if(s.fixed[exKey(gi,ei)])done++;
+      });
+    } else {
+      g.blocks.forEach((b,bi)=>{const max=b.multi||1;total+=max;const k=blockKey(gi,bi);if(b.multi)done+=(s.choices[k]||[]).length;else if(s.choices[k]!=null)done++;});
+    }
+  });
+  return{done,total};
+}
+
+// ── RENDER ────────────────────────────────────────────────────────────────────
+const PENCIL='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
+const CHECK='<svg width="11" height="9" viewBox="0 0 12 10" fill="none"><path d="M1 5l3 3 7-7" stroke="#0f0f0f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const TRASH='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>';
+const SWAP='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 16V4m0 0L3 8m4-4l4 4"/><path d="M17 8v12m0 0l4-4m-4 4l-4-4"/></svg>';
+
+function renderDayScroll(){
+  document.getElementById('dayScroll').innerHTML=DAYS.map((d,i)=>{
+    const status=getDayStatus(i);
+    const statusClass=status==='done'?'status-done':status==='skip'?'status-skip':'';
+    const statusBadge=status==='done'?'<span class="d-status">✓ DONE</span>':status==='skip'?'<span class="d-status">— SKIP</span>':'';
+    return `<div class="day-pill ${i===activeDay?'active':''} ${statusClass}" data-type="${d.type}" onclick="setDay(${i})" ondblclick="openRenameDayModal(${i})"><span class="d-label">${d.label}</span><span class="d-type">${d.typeName}</span>${statusBadge}</div>`;
+  }).join('');
+}
+
+function renderExTags(ex){const info=getDbInfo(ex.dbId);if(!info)return'';const sec=(info.secondary_muscles||[]).slice(0,2).map(m=>`<span class="ex-tag secondary">${m}</span>`).join('');return`<div class="ex-meta-row"><span class="ex-tag muscle">${info.primary_muscle}</span><span class="ex-tag equip">${info.equipment}</span>${sec}</div>`;}
+function renderOptTags(opt){const info=getDbInfo(opt.dbId);if(!info)return'';const sec=(info.secondary_muscles||[]).slice(0,1).map(m=>`<span class="ex-tag secondary" style="font-size:8px">${m}</span>`).join('');return`<div class="opt-meta"><span class="ex-tag muscle" style="font-size:8px">${info.primary_muscle}</span><span class="ex-tag equip" style="font-size:8px">${info.equipment}</span>${sec}</div>`;}
+
+function render(){
+  renderDayScroll();
+  const day=DAYS[activeDay];const s=getDayState(activeDay);const{done,total}=countProgress(activeDay);
+  const dayStatus=getDayStatus(activeDay);
+  document.getElementById('sessionTitle').textContent=day.title;
+  document.getElementById('progressCount').textContent=total>0?`${done} / ${total}`:'';
+  document.getElementById('progressBar').style.width=total>0?(done/total*100)+'%':'0%';
+  // Rename button next to title
+  const titleEl=document.getElementById('sessionTitle');
+  titleEl.innerHTML=day.title+` <button class="rename-day-btn" onclick="openRenameDayModal(${activeDay})" title="Rename day">✏️</button>`;
+  const content=document.getElementById('mainContent');const saveWrap=document.getElementById('saveWrap');const skipOnlyWrap=document.getElementById('skipOnlyWrap');
+  if(day.type==='rest'){content.innerHTML=`<div class="rest-card"><span class="rest-icon">💤</span><div class="rest-title">Rest Day</div><p class="rest-sub">Recovery is part of the program.<br>Light walk or foam rolling if you want.</p></div>`;saveWrap.style.display='none';skipOnlyWrap.style.display='none';return;}
+  const allDone=total>0&&done===total;
+  const showSave=total>0&&(done/total)>=0.8;
+  // If day already marked done, don't show skip
+  const alreadyDone=dayStatus==='done';
+  const alreadySkipped=dayStatus==='skip';
+  saveWrap.style.display=showSave&&!alreadyDone?'block':'none';
+  // Show skip-only wrap when there's something to do but save threshold not reached and not resolved
+  skipOnlyWrap.style.display=(!showSave&&total>0&&!alreadyDone&&!alreadySkipped)?'block':'none';
+  if(showSave&&!allDone){
+    const remaining=total-done;
+    document.querySelector('.save-workout-btn').textContent=allDone?'💾  Save Workout':`💾  Save Workout (${remaining} skipped)`;
+  } else if(allDone){
+    document.querySelector('.save-workout-btn').textContent='💾  Save Workout';
+  }
+  let html='';
+  if(alreadyDone){html+=`<div class="current-day-banner"><span class="cdb-arrow">✅</span><span>Workout saved — tap another day to review or continue.</span></div>`;}
+  else if(alreadySkipped){html+=`<div class="current-day-banner" style="background:rgba(255,80,80,0.08);border-color:rgba(255,80,80,0.25);color:var(--danger)"><span class="cdb-arrow">⏭</span><span>Day skipped — tap another day or do it now.</span></div>`;}
+  html+=`<div class="done-banner ${allDone?'show':''}"><p>SESSION COMPLETE</p><span>Nice work — rest up and recover.</span></div>`;
+  if(editMode)html=`<div class="edit-hint">✏️ Edit mode — tap to rename · 🔄 to swap · 🗑 to remove</div>`+html;
+  day.groups.forEach((g,gi)=>{
+    const gid=activeDay+'_'+gi;if(openGroups[gid]===undefined)openGroups[gid]=true;
+    let gDone=0,gTotal=0;
+    if(g.type==='fixed'){g.exs.forEach((_,ei)=>{gTotal++;if(s.fixed[exKey(gi,ei)])gDone++;});}
+    else{g.blocks.forEach((b,bi)=>{const max=b.multi||1;gTotal+=max;const k=blockKey(gi,bi);if(b.multi)gDone+=(s.choices[k]||[]).length;else if(s.choices[k]!=null)gDone++;});}
+    html+=`<div class="group-card ${openGroups[gid]?'open':''}" id="gc_${gid}"><div class="group-card-header" onclick="toggleGroup('${gid}')"><div class="group-card-left"><span class="group-card-name">${g.name}</span><span class="group-card-count">${gDone}/${gTotal}</span></div>${editMode?`<button class="group-settings-btn" onclick="event.stopPropagation();openGroupSettings(${activeDay},${gi})">⚙ Edit Group</button>`:'<span class="group-card-chevron">▼</span>'}</div><div class="group-card-body">`;
+    if(g.type==='choices'){const autoRule=g.blocks.map(b=>b.multi?`Choose any ${b.multi}`:'Pick 1').join(' · ');html+=`<div class="group-rule">${autoRule}</div>`;}
+    else if(g.rule)html+=`<div class="group-rule">${g.rule}</div>`;
+    if(g.type==='fixed'){
+      (g.exs||[]).forEach((ex,ei)=>{
+        const checked=!!s.fixed[exKey(gi,ei)];const prInfo=prs[ex.name];
+        const noteVal=notes[noteKey(activeDay,gi,ei)]||'';
+        html+=`<div class="ex-row ${checked?'checked':''} ${editMode?'edit-mode':''}">`;
+        html+=`<div class="check-circle" onclick="event.stopPropagation();toggleFixed(${activeDay},${gi},${ei})">${CHECK}</div>`;
+        html+=`<div class="ex-info"><div class="ex-name">${ex.name}</div>${renderExTags(ex)}`;
+        html+=`<div class="ex-weight">${ex.weight||'—'}${prInfo?` <span class="pr-badge">PR ${prInfo.display}</span>`:''}</div></div>`;
+        if(editMode){
+          html+=`<div style="display:flex;flex-direction:column;gap:2px;margin-right:2px"><button class="reorder-btn" onclick="event.stopPropagation();reorderExercise(${activeDay},${gi},${ei},-1)">▲</button><button class="reorder-btn" onclick="event.stopPropagation();reorderExercise(${activeDay},${gi},${ei},1)">▼</button></div>`;
+          html+=`<div class="swap-btn" onclick="event.stopPropagation();openPicker(${activeDay},${gi},'swap',${ei})">${SWAP}</div>`;
+          html+=`<div class="edit-icon" onclick="event.stopPropagation();openEditModal('fixed',${activeDay},${gi},${ei})">${PENCIL}</div>`;
+          html+=`<div class="edit-icon" style="color:var(--danger)" onclick="event.stopPropagation();removeExercise(${activeDay},${gi},${ei})">${TRASH}</div>`;
+        }
+        html+=`</div>`;
+        html+=`<div class="ex-note-row"><input class="note-input" placeholder="Notes, weight, reps..." value="${noteVal.replace(/"/g,'&quot;')}" onchange="saveNote(${activeDay},${gi},${ei},this.value)" onclick="event.stopPropagation()"></div>`;
+      });
+      if(editMode)html+=`<button class="add-ex-btn" onclick="openPicker(${activeDay},${gi},'add')">+ Add exercise</button>`;
+    } else {
+      g.blocks.forEach((b,bi)=>{
+        const isMulti=!!b.multi;const maxPick=b.multi||1;const k=blockKey(gi,bi);
+        const pickLabel=isMulti?`Choose any ${maxPick}`:'Pick 1';
+        const blockHeader=b.label?b.label.replace(/pick \d+|choose any \d+|choose \d+/i,pickLabel):pickLabel;
+        html+=`<div class="choice-block"><div class="choice-header"><span>${blockHeader}</span></div>`;
+        b.opts.forEach((opt,oi)=>{
+          const sel=isMulti?(s.choices[k]||[]).includes(oi):s.choices[k]===oi;
+          const cnk=noteKey(activeDay,gi,bi*1000+oi);const cnoteVal=notes[cnk]||'';
+          html+=`<div class="choice-opt ${sel?'selected':''}" onclick="toggleChoice(${activeDay},${gi},${bi},${oi},${isMulti},${maxPick})">`;
+          html+=`<div class="radio-dot"><div class="radio-dot-inner"></div></div>`;
+          html+=`<div class="opt-info"><div class="opt-name">${opt.name}</div>${renderOptTags(opt)}<div class="opt-weight">${opt.weight||''}</div>${sel&&cnoteVal?`<div class="ex-note">📝 ${cnoteVal}</div>`:''}</div>`;
+          if(editMode){
+            html+=`<div class="swap-btn" onclick="event.stopPropagation();openChoiceSwap(${activeDay},${gi},${bi},${oi})">${SWAP}</div>`;
+            html+=`<div class="edit-icon" onclick="event.stopPropagation();openEditModal('choice',${activeDay},${gi},${bi},${oi})">${PENCIL}</div>`;
+            html+=`<div class="edit-icon" style="color:var(--danger)" onclick="event.stopPropagation();removeChoiceOpt(${activeDay},${gi},${bi},${oi})">${TRASH}</div>`;
+          }
+          html+=`</div>`;
+          if(sel&&!editMode){html+=`<div class="note-row"><input class="note-input" placeholder="Weight used / notes..." value="${cnoteVal.replace(/"/g,'&quot;')}" onchange="saveNote(${activeDay},${gi},${bi*1000+oi},this.value)" onclick="event.stopPropagation()"></div>`;}
+        });
+        if(editMode)html+=`<button class="add-ex-btn" style="margin-top:4px" onclick="openChoiceAdd(${activeDay},${gi},${bi})">+ Add option</button>`;
+        html+=`</div>`;
+      });
+      if(editMode)html+=`<button class="add-ex-btn" onclick="openChoiceBlockAdd(${activeDay},${gi})">+ Add choice block</button>`;
+    }
+    if(editMode){
+      html+=`<div style="display:flex;gap:6px;margin-top:10px;padding-top:8px;border-top:1px solid var(--border)">`;
+      html+=`<button class="add-ex-btn" style="flex:1;text-align:center" onclick="addNewGroup(${activeDay},${gi},'fixed')">+ Fixed Group</button>`;
+      html+=`<button class="add-ex-btn" style="flex:1;text-align:center" onclick="addNewGroup(${activeDay},${gi},'choices')">+ Choice Group</button>`;
+      html+=`<button class="add-ex-btn" style="flex:1;text-align:center;color:var(--danger)" onclick="removeGroup(${activeDay},${gi})">✕ Remove</button>`;
+      html+=`</div>`;
+    }
+    html+=`</div></div>`;
+  });
+  content.innerHTML=html;
+}
+
+function renderHistory(){
+  const el=document.getElementById('historyContent');
+  const q=(document.getElementById('historySearch')?.value||'').toLowerCase();
+  let filtered=workoutHistory.filter(h=>{
+    const typeOk=historyFilter==='all'||h.dayType===historyFilter;
+    const searchOk=!q||h.title.toLowerCase().includes(q)||h.dayLabel.toLowerCase().includes(q)||h.exercises.some(ex=>ex.name.toLowerCase().includes(q));
+    return typeOk&&searchOk;
+  });
+
+  // Edit mode toggle bar + Add button
+  const editBar = `
+    <div class="history-edit-bar">
+      <span class="history-edit-label">${historyEditMode ? '✏️ Edit Mode — tap a session to modify' : 'Your workout history'}</span>
+      <button class="history-edit-toggle ${historyEditMode?'active':''}" onclick="toggleHistoryEditMode()">${historyEditMode ? 'Done' : '✏️ Edit'}</button>
+    </div>
+    ${historyEditMode ? `<div style="padding:12px 16px 4px"><button class="hist-add-btn" onclick="addManualLog()">＋ Add Manual Session</button></div>` : ''}
+  `;
+
+  if(!filtered.length){
+    el.innerHTML=editBar+`<div class="history-empty"><div class="history-empty-icon">📋</div><div class="history-empty-text">${workoutHistory.length?'No sessions match your filter.':'No workouts saved yet.<br>Finish a session and tap<br><strong style="color:var(--text)">Save Workout</strong>.'}</div></div>`;
+    return;
+  }
+  const tc={push:'var(--push)',pull:'var(--pull)',legs:'var(--legs)',upper:'var(--upper)',lower:'var(--lower)'};
+  const entries = filtered.map(entry=>`
+    <div class="history-entry ${historyEditMode?'editable':''}">
+      <div class="history-header">
+        <div>
+          <div class="history-date">${entry.date}</div>
+          <div class="history-meta">${entry.exercises.length} exercise${entry.exercises.length!==1?'s':''}</div>
+        </div>
+        <span class="history-type-badge" style="background:${tc[entry.dayType]||'#555'}22;color:${tc[entry.dayType]||'#aaa'};border:1px solid ${tc[entry.dayType]||'#555'}44">${entry.title}</span>
+      </div>
+      <div class="history-body">
+        ${entry.exercises.map(ex=>`<div><div class="history-ex"><span class="history-ex-name">${ex.name}${ex.isPR?' 🏆':''}</span><span class="history-ex-weight">${ex.weight||''}</span></div>${ex.note?`<div class="history-note">📝 ${ex.note}</div>`:''}</div>`).join('')}
+      </div>
+      ${historyEditMode ? `
+        <div class="history-edit-actions">
+          <button class="hist-action-btn edit" onclick="openLogEditor(${entry.id})">✏️ Edit Session</button>
+          <button class="hist-action-btn del" onclick="deleteHistory(${entry.id})">🗑 Delete</button>
+        </div>` : `<button class="history-del-btn" onclick="deleteHistory(${entry.id})">Delete Entry</button>`}
+    </div>`).join('');
+  el.innerHTML = editBar + `<div style="padding:0 16px 16px">${entries}</div>`;
+}
+
+function renderStats(){
+  const el=document.getElementById('statsContent');
+  const streak=calcStreak();const prCount=Object.keys(prs).length;
+  const filtered=getFilteredHistory();
+  const muscleColors={chest:'var(--push)',shoulders:'var(--push)',triceps:'var(--push)',back:'var(--pull)',biceps:'var(--pull)',quads:'var(--legs)',hamstrings:'var(--legs)',glutes:'var(--legs)',calves:'var(--legs)',abs:'var(--lower)',core:'var(--lower)'};
+  const muscleCount={};filtered.forEach(h=>h.exercises.forEach(ex=>{const info=Object.values(dbCache).find(d=>d.name===ex.name);if(info){muscleCount[info.primary_muscle]=(muscleCount[info.primary_muscle]||0)+1;}}));
+  const topMuscles=Object.entries(muscleCount).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const maxMuscle=topMuscles.length?topMuscles[0][1]:1;
+  const recent=filtered.slice(0,8).reverse();const maxEx=Math.max(...recent.map(h=>h.exercises.length),1);
+  const typeColor={push:'var(--push)',pull:'var(--pull)',legs:'var(--legs)',upper:'var(--upper)',lower:'var(--lower)',rest:'var(--rest)'};
+  const rangeTabs=['week','month','all'].map(r=>`<div class="stats-range-tab${statsRange===r?' active':''}" data-range="${r}" onclick="setStatsRange('${r}')">${r==='all'?'All Time':r.charAt(0).toUpperCase()+r.slice(1)}</div>`).join('');
+  const volumeChart=topMuscles.length?`<div class="chart-wrap volume-chart"><div class="chart-title">Volume by Muscle</div>${topMuscles.map(([m,c])=>`<div class="volume-bar-row"><div class="volume-bar-label">${m}</div><div class="volume-bar-track"><div class="volume-bar-fill" style="width:${Math.round(c/maxMuscle*100)}%;background:${muscleColors[m]||'var(--upper)'}"></div></div><div class="volume-bar-count">${c}</div></div>`).join('')}</div>`:'';
+  el.innerHTML=`
+    <div class="stats-range-tabs">${rangeTabs}</div>
+    <div class="stats-grid">
+      <div class="stat-card accent"><div class="stat-value">${streak}</div><div class="stat-label">🔥 Streak</div></div>
+      <div class="stat-card"><div class="stat-value">${filtered.length}</div><div class="stat-label">Sessions</div></div>
+      <div class="stat-card"><div class="stat-value">${filtered.reduce((a,h)=>a+h.exercises.length,0)}</div><div class="stat-label">Exercises</div></div>
+      <div class="stat-card accent"><div class="stat-value">${prCount}</div><div class="stat-label">🏆 PRs</div></div>
+    </div>
+    ${recent.length?`<div class="chart-wrap"><div class="chart-title">Recent Sessions</div><div class="bar-chart">${recent.map(h=>`<div class="bar-col"><div class="bar" style="height:${Math.round((h.exercises.length/maxEx)*72)}px;background:${typeColor[h.dayType]||'var(--check)'}"></div><div class="bar-label">${h.dayLabel}</div></div>`).join('')}</div></div>`:''}
+    ${volumeChart}
+    <div class="settings-label" style="margin-top:4px">Personal Records</div>
+    ${!prCount?'<div style="font-size:13px;color:var(--muted);padding:12px 0">No PRs yet.</div>':'<div>'+Object.entries(prs).sort((a,b)=>new Date(b[1].date)-new Date(a[1].date)).map(([name,pr])=>`<div class="pr-item"><div><div class="pr-ex-name">${name}</div><div class="pr-ex-date">${pr.date}</div></div><div class="pr-ex-val">🏆 ${pr.display}</div></div>`).join('')+'</div>'}
+  `;
+}
+
+function renderSettings(){
+  if(currentUser){document.getElementById('settingsUsername').textContent=currentUser.username||'—';document.getElementById('settingsEmail').textContent=offlineMode?'Offline mode':'Synced to cloud';}
+  if(activeProgram){document.getElementById('settingsProgramName').textContent=activeProgram.name||'My Split';}
+  // Highlight active weight unit button
+  const lbsBtn=document.getElementById('unitLbsBtn');
+  const kgBtn=document.getElementById('unitKgBtn');
+  if(lbsBtn&&kgBtn){
+    const activeStyle='background:var(--check);color:#0f0f0f;';
+    const inactiveStyle='background:none;color:var(--muted);';
+    lbsBtn.style.cssText=lbsBtn.style.cssText.replace(/background:[^;]+;|color:[^;]+;/g,'')+(weightUnit==='lbs'?activeStyle:inactiveStyle);
+    kgBtn.style.cssText=kgBtn.style.cssText.replace(/background:[^;]+;|color:[^;]+;/g,'')+(weightUnit==='kg'?activeStyle:inactiveStyle);
+  }
+  updateProgSwitchBtn();
+}
+
+function clearLocalAndSync(){if(confirm('Clear local cache and reload from server?')){localStorage.removeItem('workout_state');localStorage.removeItem('workout_notes');localStorage.removeItem('workout_prs');localStorage.removeItem('workout_sets');window.location.reload();}}
+
+// ── NAVIGATION ────────────────────────────────────────────────────────────────
+function goPage(page){
+  if(page!=='workout'&&editMode)toggleEditMode();
+  if(page!=='history'&&historyEditMode){historyEditMode=false;}
+  currentPage=page;
+  const isWorkout=page==='workout';
+  document.getElementById('editModeBtn').style.display=isWorkout?'':'none';
+  document.getElementById('topResetBtn').style.display=isWorkout?'':'none';
+  document.getElementById('progSwitchBtn').style.display=isWorkout?'':'none';
+  ['workout','history','stats','library','settings'].forEach(p=>{document.getElementById('page'+p.charAt(0).toUpperCase()+p.slice(1)).classList.toggle('active',p===page);document.getElementById('nav-'+p).classList.toggle('active',p===page);});
+  if(page==='history')renderHistory();
+  if(page==='stats')renderStats();
+  if(page==='settings')renderSettings();
+  if(page==='library'){loadLibrary();}
+}
+function closeModal(id){document.getElementById(id).classList.remove('open');if(id==='pickerModal')pickerTarget=null;if(id==='logEditorModal')logEditorTarget=null;}
+function setDay(i){activeDay=i;openGroups={};render();}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js'));}
+
+// Auto-login if token exists
+if(authToken&&currentUser){bootApp();}
+</script>
+</body>
+</html>ush</div>
         <div class="filter-chip" data-filter="pull" onclick="setHistoryFilter('pull')">Pull</div>
         <div class="filter-chip" data-filter="legs" onclick="setHistoryFilter('legs')">Legs</div>
         <div class="filter-chip" data-filter="upper" onclick="setHistoryFilter('upper')">Upper</div>
